@@ -58,10 +58,22 @@ class manage_role(commands.Cog):
         roach_cock_role_id = self.settings_data.get("roach_cock_role_id") #Get roach cock role ID from JSON.
 
         guild_cock_role = discord.utils.get(interaction.guild.roles, id=roach_cock_role_id) #user.remove_roles and vice versa need a discord.Role object, not just the ID.
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
+        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
 
-        # If not @M or @A, deny access.
-        if not discord.utils.get(interaction.user.guild.roles, id=admin_role_id) or not discord.utils.get(interaction.user.guild.roles, id=mod_role_id):
-            await interaction.response.send_message("Access denied.", ephemeral=True)
+        has_permission = False
+        
+        if guild_admin_role and guild_admin_role in interaction.user.roles:
+            has_permission = True
+
+        if guild_mod_role and guild_mod_role in interaction.user.roles:
+            has_permission = True
+
+        if not has_permission:
+            await interaction.response.send_message(
+                "Access denied.",
+                ephemeral=True
+            )
             return
         
         # Let the magic happen, baby.
@@ -85,9 +97,22 @@ class manage_role(commands.Cog):
 
         guild_L_role = discord.utils.get(interaction.guild.roles, id=L_role_id) #user.remove_roles and vice versa need a discord.Role object, not just the ID.
 
-        # If not @M or @A, deny access.
-        if not discord.utils.get(interaction.user.guild.roles, id=admin_role_id) or not discord.utils.get(interaction.user.guild.roles, id=mod_role_id):
-            await interaction.response.send_message("Access denied.", ephemeral=True)
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
+        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
+
+        has_permission = False
+        
+        if guild_admin_role and guild_admin_role in interaction.user.roles:
+            has_permission = True
+
+        if guild_mod_role and guild_mod_role in interaction.user.roles:
+            has_permission = True
+
+        if not has_permission:
+            await interaction.response.send_message(
+                "Access denied.",
+                ephemeral=True
+            )
             return
         
         # Let the magic happen, baby.
