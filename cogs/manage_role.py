@@ -19,66 +19,6 @@ GUILD_ID = int(os.getenv('guild'))
 VERSION = os.getenv('version')
 
 VARIABLES_FILE = "data/variables.json"
-GOSPELS_FILE = "data/bible_gospels.json"
-
-class bible(commands.Cog):
-    
-    # --- Initialize class ---
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.variables_file = {}
-    
-        # Allow EnduraBot in this cog to ping roles and users.
-        self.default_allowed_mentions = AllowedMentions(
-                everyone=False,  # Don't ping @everyone or @here by default
-                users=True,      # Allow user mentions (like interaction.user.mention)
-                roles=True       # Explicitly allow role mentions to trigger pings
-            )
-        
-        # Load the variables.json file.
-        try:
-            with open(VARIABLES_FILE, 'r') as file_object:
-                self.settings_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
-            return
-        
-        # Load the gospels.json file.
-        try:
-            with open(GOSPELS_FILE, 'r') as file_object:
-                self.gospels_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded gospel names from {GOSPELS_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {GOSPELS_FILE} not found.")
-            return
-
-
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-import discord
-from discord.ext import commands
-from discord import app_commands
-from discord import app_commands, AllowedMentions
-import random
-import json
-import re
-import logging
-
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
-
-GUILD_ID = int(os.getenv('guild'))
-VERSION = os.getenv('version')
-
-VARIABLES_FILE = "data/variables.json"
 
 class manage_role(commands.Cog):
     
