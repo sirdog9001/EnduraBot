@@ -1,11 +1,11 @@
 {
     "repo": "https://github.com/sirdog9001/EnduraBot",
     "version": 0.1,
-    "out_of_context_channel_id": 900478727731949598,
-    "alert_channel_id": 1425371198845489292,
-    "sysop_role_id": 722778922110156850,
-    "mod_role_id": 722778922110156850,
-    "admin_role_id": 722778922110156850,
-    "roach_cock_role_id": 1425748524821123132,
-    "L_role_id": 1425755579543978054
+    "out_of_context_channel_id": 906760388908048424,
+    "alert_channel_id": 1362230408091009106,
+    "sysop_role_id": 1362230058462478386,
+    "mod_role_id": 1364803654825148447,
+    "admin_role_id": 854228249671368705,
+    "roach_cock_role_id": 1355375759950348459,
+    "L_role_id": 1405957143097770116
 }
