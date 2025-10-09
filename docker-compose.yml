@@ -1,0 +1,12 @@
+# Example: ~/Desktop/my_discord_bot/docker-compose.yml
+version: '3.8' # Specifies the version of the Docker Compose file format
+
+services:
+  # This is the name of our service (you can change it, but keep it consistent)
+  discord-bot:
+    # Build the image from the Dockerfile in the current directory ('.')
+    image: endurabot:latest
+    # Give a human-readable name to the running container
+    container_name: EnduraBot
+    # Automatically restart the container if it stops, unless explicitly told to stop
+    restart: unless-stopped

@@ -1,0 +1,140 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import discord
+from discord.ext import commands
+from discord import app_commands
+from discord import app_commands, AllowedMentions
+import random
+import json
+import re
+import logging
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.INFO)
+
+GUILD_ID = int(os.getenv('guild'))
+VERSION = os.getenv('version')
+
+VARIABLES_FILE = "data/variables.json"
+
+class user_cmds(commands.Cog):
+    
+    # --- Initialize class ---
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.variables_file = {}
+    
+        # Allow EnduraBot in this cog to ping roles and users.
+        self.default_allowed_mentions = AllowedMentions(
+                everyone=False,  # Don't ping @everyone or @here by default
+                users=True,      # Allow user mentions (like interaction.user.mention)
+                roles=True       # Explicitly allow role mentions to trigger pings
+            )
+        
+    # --- Load JSON ---
+
+        try:
+            with open(VARIABLES_FILE, 'r') as file_object:
+                self.settings_data = json.load(file_object)
+                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
+        
+        except FileNotFoundError:
+            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
+            return
+
+
+    # --- COMMAND: /info ---
+
+
+    @app_commands.command(name="info", description="Get information on a server member.")
+    @app_commands.guilds(GUILD_ID)
+    async def info(self, interaction: discord.Interaction, user: discord.Member):
+        
+        create_epoch = round(user.created_at.timestamp()) #Get UNIX timestamp for when the member's account was created.
+        join_epoch = round(user.joined_at.timestamp()) #Get UNIX timestamp for when member joined the Discord.
+        role_ids = [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"] #Get list of all role IDs the user has, excluding the default @@everyone role.
+        sysop_role_id = self.settings_data.get("sysop_role_id") #Get SYSOP role ID from JSON.
+        mod_role_id = self.settings_data.get("mod_role_id") #Get mod role ID from JSON.
+        admin_role_id = self.settings_data.get("admin_role_id") #Get admin role ID from JSON.
+
+        # Check to determine if the user is an EDC sysop.
+        if discord.utils.get(interaction.user.guild.roles, id=sysop_role_id):
+           is_sysop = ":white_check_mark:"
+        else:
+            is_sysop= ":x:"
+
+        # Check to determine if the user is staff in EDC.
+        staff_roles = [mod_role_id, admin_role_id]
+
+        if any(role.name in staff_roles for role in interaction.user.guild.roles):
+            is_staff = ":white_check_mark:"
+        else:
+            is_staff = ":x:"
+
+        embed = discord.Embed(title=f"Information on {user.name}.", color=discord.Color.green())
+        embed.set_thumbnail(url=user.display_avatar.url)
+        embed.add_field(name="Identity", value=f"{user.mention} ({user.id})", inline=False)
+        embed.add_field(name="Account Created", value=f"<t:{create_epoch}:f> (<t:{create_epoch}:R>)", inline=False)
+        embed.add_field(name="Joined", value=f"<t:{join_epoch}:f> (<t:{join_epoch}:R>)", inline=False)
+        embed.add_field(name="Backend Operator?", value=is_sysop)
+        embed.add_field(name="Server Staff?", value=is_staff)
+        
+        if len(user.roles) - 1 == 1: #We do -1 to exclude @@everyone.
+            embed.add_field(name="Roles", value="None", inline=False)
+        else:
+            embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
+            
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+    # --- COMMAND: /about ---
+
+
+    @app_commands.command(name="about", description="Get information about EnduraBot.")
+    @app_commands.guilds(GUILD_ID)
+    async def about(self, interaction: discord.Interaction):
+        
+        repo = self.settings_data.get("repo")
+        
+        embed = discord.Embed(
+            title="About me",
+            description=f"Hello! My name is EnduraBot. I am a general purpose bot made for the Endurance Coalition. My creator is <@281589411962028034>.",
+            color=discord.Color.blue()
+                              )
+        embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+        embed.add_field(name="Version", value=VERSION, inline=False)
+        embed.add_field(name="GitHub Repository", value=repo, inline=False)
+
+        await interaction.response.send_message(embed=embed)
+
+
+    # --- COMMAND: /alert ---
+
+
+    @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
+    @app_commands.guilds(GUILD_ID)
+    
+    async def alert(self, interaction: discord.Interaction, desc: str):
+
+        alert_channel_id = self.settings_data.get("alert_channel_id")
+
+        if not interaction.channel.id == alert_channel_id:
+            await interaction.response.send_message(content=f"Alerts may only be made in <#{alert_channel_id}>.", ephemeral=True)
+            return
+        
+        sysop_role_id = self.settings_data.get("sysop_role_id")
+        sysop_role = interaction.guild.get_role(sysop_role_id)
+
+        await interaction.response.send_message(
+            content=f"# :rotating_light: ALERT :rotating_light:\n{sysop_role.mention}\n\n {interaction.user.mention} is reporting an error and requests systems operator investigation.\n\n The following details were provided:\n```\n{desc}\n```", 
+            allowed_mentions=self.default_allowed_mentions
+            )
+
+
+async def setup(bot):
+    await bot.add_cog(user_cmds(bot))
