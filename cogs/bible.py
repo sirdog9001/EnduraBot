@@ -20,6 +20,18 @@ GUILD_ID = int(os.getenv('guild'))
 VARIABLES_FILE = "data/variables.json"
 GOSPELS_FILE = "data/bible_gospels.json"
 
+
+def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown | None:
+
+    cog_instance = interaction.client.get_cog('bible')
+
+    user_role_ids = {role.id for role in interaction.user.roles}
+
+    if not cog_instance.exempt_role_ids.isdisjoint(user_role_ids):
+        return None
+    
+    return app_commands.Cooldown(1, 1800)
+
 class bible(commands.Cog):
     
     # --- Initialize class ---
@@ -41,6 +53,7 @@ class bible(commands.Cog):
         try:
             with open(VARIABLES_FILE, 'r') as file_object:
                 self.settings_data = json.load(file_object)
+                self.exempt_role_ids = set(self.settings_data.get("cooldown_exempt_roles"))
                 logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
         
         except FileNotFoundError:
@@ -57,19 +70,18 @@ class bible(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {GOSPELS_FILE} not found.")
             return
 
-
-
     # --- COMMAND: /bibleq ---
 
     @app_commands.command(name="bibleq", description="Generate a totally legitimate Bible quote.")
     @app_commands.guilds(GUILD_ID)
+    @app_commands.checks.dynamic_cooldown(custom_cooldown)
 
     async def bibleq(self, interaction: discord.Interaction):
         
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
         random_gospel = random.choice(self.gospels_data)
-        fetch_limit = 100 # Going too far back would be resource intensive.
+        fetch_limit = 100 # Going too far back would be resource intensive
 
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
@@ -99,6 +111,14 @@ class bible(commands.Cog):
         embed.set_footer(text="This quote is not representative of the Endurance Coalition's values.")
         await interaction.response.send_message(embed=embed)
 
+    @bibleq.error
+    async def bibleq_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            minutes, seconds = divmod(int(error.retry_after), 60)
+            if minutes > 0:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {minutes} minute(s) and {seconds} second(s).", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(bible(bot))
