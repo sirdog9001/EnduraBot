@@ -11,8 +11,8 @@ import discord
 from discord.ext import commands
 
 BOT_TOKEN= os.getenv('bot_token')
-version = os.getenv('version')
 GUILD_ID = int(os.getenv('guild'))
+
 guild_object = discord.Object(id=GUILD_ID)
 whitelisted_guild_ids_str = os.getenv('guilds')
 
@@ -34,7 +34,6 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_ready():
-    logger.info("EnduraBot v" + version + " is now online.")
 
     # Load cogs.
     try:

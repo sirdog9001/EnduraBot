@@ -16,7 +16,6 @@ logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
 
 GUILD_ID = int(os.getenv('guild'))
-VERSION = os.getenv('version')
 
 VARIABLES_FILE = "data/variables.json"
 GOSPELS_FILE = "data/bible_gospels.json"
