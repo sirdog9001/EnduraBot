@@ -71,12 +71,16 @@ class bible(commands.Cog):
         random_gospel = random.choice(self.gospels_data)
         fetch_limit = 100 # Going too far back would be resource intensive.
 
+        if interaction.channel.id == ooc_channel_id:
+            await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
+            return
+
         msg_table = [
             msg async for msg in ooc_channel.history(limit=fetch_limit)
-            if not msg.author.bot # Not from a bot
-            and ( # Start of combined OR condition
-                (msg.content and ( # Message has text AND CONTAINS a quoted string
-                    re.search(r'''["](.+?)["]''', msg.content) # Checks if content CONTAINS "..."
+            if not msg.author.bot
+            and ( 
+                (msg.content and (
+                    re.search(r'''["](.+?)["]''', msg.content)
                 ))
             )
         ]
