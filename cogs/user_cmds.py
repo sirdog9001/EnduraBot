@@ -16,7 +16,6 @@ logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
 
 GUILD_ID = int(os.getenv('guild'))
-VERSION = os.getenv('version')
 
 VARIABLES_FILE = "data/variables.json"
 
@@ -100,6 +99,7 @@ class user_cmds(commands.Cog):
     async def about(self, interaction: discord.Interaction):
         
         repo = self.settings_data.get("repo")
+        version = self.settings_data.get("version")
         
         embed = discord.Embed(
             title="About me",
@@ -107,7 +107,7 @@ class user_cmds(commands.Cog):
             color=discord.Color.blue()
                               )
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
-        embed.add_field(name="Version", value=VERSION, inline=False)
+        embed.add_field(name="Version", value=version, inline=False)
         embed.add_field(name="GitHub Repository", value=repo, inline=False)
 
         await interaction.response.send_message(embed=embed)
