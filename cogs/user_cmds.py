@@ -61,16 +61,16 @@ class user_cmds(commands.Cog):
         mod_role_id = self.settings_data.get("mod_role_id") #Get mod role ID from JSON.
         admin_role_id = self.settings_data.get("admin_role_id") #Get admin role ID from JSON.
 
-        # Check to determine if the user is an EDC sysop.
-        if discord.utils.get(interaction.user.guild.roles, id=sysop_role_id):
-           is_sysop = ":white_check_mark:"
+        guild_sysop_role = discord.utils.get(interaction.guild.roles, id=sysop_role_id)
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
+        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
+
+        if guild_sysop_role in user.roles:
+            is_sysop = ":white_check_mark:"
         else:
             is_sysop= ":x:"
 
-        # Check to determine if the user is staff in EDC.
-        staff_roles = [mod_role_id, admin_role_id]
-
-        if any(role.name in staff_roles for role in interaction.user.guild.roles):
+        if guild_admin_role in user.roles or guild_mod_role in user.roles:
             is_staff = ":white_check_mark:"
         else:
             is_staff = ":x:"

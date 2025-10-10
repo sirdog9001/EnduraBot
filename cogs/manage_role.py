@@ -63,10 +63,10 @@ class manage_role(commands.Cog):
 
         has_permission = False
         
-        if guild_admin_role and guild_admin_role in interaction.user.roles:
+        if guild_admin_role in interaction.user.roles:
             has_permission = True
 
-        if guild_mod_role and guild_mod_role in interaction.user.roles:
+        if guild_mod_role in interaction.user.roles:
             has_permission = True
 
         if not has_permission:
@@ -102,10 +102,10 @@ class manage_role(commands.Cog):
 
         has_permission = False
         
-        if guild_admin_role and guild_admin_role in interaction.user.roles:
+        if guild_admin_role in interaction.user.roles:
             has_permission = True
 
-        if guild_mod_role and guild_mod_role in interaction.user.roles:
+        if guild_mod_role in interaction.user.roles:
             has_permission = True
 
         if not has_permission:
