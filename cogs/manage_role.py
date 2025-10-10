@@ -18,6 +18,7 @@ logger.setLevel(logging.INFO)
 GUILD_ID = int(os.getenv('guild'))
 
 VARIABLES_FILE = "data/variables.json"
+EDITABLE_ROLES = "data/editable_roles.json"
 
 class manage_role(commands.Cog):
     
@@ -44,84 +45,51 @@ class manage_role(commands.Cog):
         except FileNotFoundError:
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
             return
-
-
-    # --- COMMAND: /roachcock ---
-
-
-    @app_commands.command(name="roachcock", description="Give or revoke the Roach Cock role from a user.")
-    @app_commands.guilds(GUILD_ID)
-    async def roachcock(self, interaction: discord.Interaction, user: discord.Member):
-        mod_role_id = self.settings_data.get("mod_role_id") #Get mod role ID from JSON.
-        admin_role_id = self.settings_data.get("admin_role_id") #Get admin role ID from JSON.
-        roach_cock_role_id = self.settings_data.get("roach_cock_role_id") #Get roach cock role ID from JSON.
-
-        guild_cock_role = discord.utils.get(interaction.guild.roles, id=roach_cock_role_id) #user.remove_roles and vice versa need a discord.Role object, not just the ID.
-        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
-        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
-
-        has_permission = False
         
-        if guild_admin_role in interaction.user.roles:
-            has_permission = True
-
-        if guild_mod_role in interaction.user.roles:
-            has_permission = True
-
-        if not has_permission:
-            await interaction.response.send_message(
-                "Access denied.",
-                ephemeral=True
-            )
+        try:
+            with open(EDITABLE_ROLES, 'r') as file_object:
+                self.editable_data = json.load(file_object)
+                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {EDITABLE_ROLES}")
+        
+        except FileNotFoundError:
+            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {EDITABLE_ROLES} not found.")
             return
         
-        # Let the magic happen, baby.
-        if guild_cock_role in user.roles:
-            await user.remove_roles(guild_cock_role)
-            await interaction.response.send_message(f"{user.mention}, you have been spared from your roachy fate by {interaction.user.mention}. Be eternally grateful.", allowed_mentions=self.default_allowed_mentions)
-        else:
-            await user.add_roles(guild_cock_role)
-            await interaction.response.send_message(f"{user.mention}, you have been cursed with the ROACH COCK by {interaction.user.mention}. You probably deserved it. :cockroach:", allowed_mentions=self.default_allowed_mentions)
-        
-
-    # --- COMMAND: /takel ---
 
 
-    @app_commands.command(name="takel", description="Give or revoke the L role from a user.")
+    # --- COMMAND: /editrole
+
+
+    @app_commands.command(name="editrole", description="Give or revoke roles.")
     @app_commands.guilds(GUILD_ID)
-    async def takel(self, interaction: discord.Interaction, user: discord.Member):
-        mod_role_id = self.settings_data.get("mod_role_id") #Get mod role ID from JSON.
-        admin_role_id = self.settings_data.get("admin_role_id") #Get admin role ID from JSON.
-        L_role_id = self.settings_data.get("L_role_id") #Get L role ID from JSON.
-
-        guild_L_role = discord.utils.get(interaction.guild.roles, id=L_role_id) #user.remove_roles and vice versa need a discord.Role object, not just the ID.
-
-        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
+    async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role):
+        mod_role_id = self.settings_data.get("mod_role_id")
+        admin_role_id = self.settings_data.get("admin_role_id")
         guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
 
-        has_permission = False
-        
-        if guild_admin_role in interaction.user.roles:
-            has_permission = True
+        # If not a moderator or administrator, reject.
+        if not guild_mod_role in interaction.user.roles and not guild_admin_role in interaction.user.roles:
+            await interaction.response.send_message("Access denied.", ephemeral=True)
+            return
 
-        if guild_mod_role in interaction.user.roles:
-            has_permission = True
-
-        if not has_permission:
-            await interaction.response.send_message(
-                "Access denied.",
-                ephemeral=True
-            )
+        # If the role is not editable AND the executor is not an administrator, reject. If an administrator, approve.
+        if role.id not in self.editable_data.values() and not guild_admin_role in interaction.user.roles:
+            await interaction.response.send_message("You do not have permission to edit this role.", ephemeral=True)
             return
         
-        # Let the magic happen, baby.
-        if guild_L_role in user.roles:
-            await user.remove_roles(guild_L_role)
-            await interaction.response.send_message(f"{user.mention}, you have been spared from your :regional_indicator_l: fate by {interaction.user.mention}. Be eternally grateful.", allowed_mentions=self.default_allowed_mentions)
-        else:
-            await user.add_roles(guild_L_role)
-            await interaction.response.send_message(f"{user.mention}, I'm gonna need you to take this :regional_indicator_l: given to you by {interaction.user.mention}. I'm disappointed in you.", allowed_mentions=self.default_allowed_mentions)
+        # Disallow messing with the admin or mod roles for security reasons.
+        if role == guild_mod_role or role == guild_admin_role:
+            await interaction.response.send_message("Adjusting the mod or admin roles with EnduraBot is restricted for security purposes.", ephemeral=True)
+            return
         
-
+        # Change roles.
+        if role in user.roles:
+            await user.remove_roles(role)
+            await interaction.response.send_message(f"{user.mention} role **@{role.name}** has been removed.", allowed_mentions=self.default_allowed_mentions)
+        else:
+            await user.add_roles(role)
+            await interaction.response.send_message(f"{user.mention} role **@{role.name}** has been added.", allowed_mentions=self.default_allowed_mentions)
+        
 async def setup(bot):
     await bot.add_cog(manage_role(bot))
