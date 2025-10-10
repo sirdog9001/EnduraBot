@@ -121,17 +121,22 @@ class user_cmds(commands.Cog):
     
     async def alert(self, interaction: discord.Interaction, desc: str):
 
+        sailor_role_id = self.settings_data.get("sailor_role_id") #Get mod role ID from JSON.
+        sysop_role_id = self.settings_data.get("sysop_role_id")
         alert_channel_id = self.settings_data.get("alert_channel_id")
+        guild_sailor_role = discord.utils.get(interaction.guild.roles, id=sailor_role_id)
+        guild_alert_channel = self.bot.get_channel(alert_channel_id)
+        sysop_role = interaction.guild.get_role(sysop_role_id)
+        
 
-        if not interaction.channel.id == alert_channel_id:
-            await interaction.response.send_message(content=f"Alerts may only be made in <#{alert_channel_id}>.", ephemeral=True)
+        # Only allow sailors to use this command.
+        if not guild_sailor_role in interaction.user.roles:
+            await interaction.response.send_message(content="Access denied.", ephemeral=True)
             return
         
-        sysop_role_id = self.settings_data.get("sysop_role_id")
-        sysop_role = interaction.guild.get_role(sysop_role_id)
-
-        await interaction.response.send_message(
-            content=f"# :rotating_light: ALERT :rotating_light:\n{sysop_role.mention}\n\n {interaction.user.mention} is reporting an error and requests systems operator investigation.\n\n The following details were provided:\n```\n{desc}\n```", 
+        await interaction.response.send_message(content="Your report has been submitted.", ephemeral=True)
+        await guild_alert_channel.send(
+            content=f"# :rotating_light: INCIDENT ALERT :rotating_light:\n\n **Attention**: {sysop_role.mention}\n\n **Reporting User**: {interaction.user.mention} (from <#{interaction.channel.id}>) \n\n **Details**: \"{desc}\" \n\n Systems operator investigation requested! Please post in this channel and notify {interaction.user.mention} when investigation begins.", 
             allowed_mentions=self.default_allowed_mentions
             )
 
