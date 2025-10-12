@@ -140,6 +140,34 @@ class user_cmds(commands.Cog):
             allowed_mentions=self.default_allowed_mentions
             )
 
+    # --- COMMAND: /estop ---
+
+    @app_commands.command(name="estop", description="Perform an emergency shutdown of EnduraBot.")
+    @app_commands.guilds(GUILD_ID)
+
+    async def estop(self, interaction: discord.Interaction):
+
+        guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
+        sysop_role_id = interaction.guild.get_role(self.settings_data.get("sysop_role_id"))
+
+        eligible_roles = [
+            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id")),
+            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id")),
+            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
+        ]
+
+        if not set(eligible_roles).intersection(interaction.user.roles):
+            await interaction.response.send_message("Access denied.", ephemeral=True)
+            return
+        
+        await interaction.response.send_message(content=f"Emergency stop has been activated. Report sent to <#{guild_alert_channel.id}>.", ephemeral=True)
+        await guild_alert_channel.send(
+            content=f"# :warning: Emergency Stop Activation\n\n{sysop_role_id.mention}\n\n {interaction.user.mention} activated EnduraBot's **emergency stop** at this time. Please speak with them for details.\n\n EnduraBot will need to be manually rebooted in Portainer.", 
+            allowed_mentions=self.default_allowed_mentions
+            )
+        
+        logger.critical(f"Emergency stop activated by {interaction.user.name}. Shutting down...")
+        await self.bot.close()
 
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
