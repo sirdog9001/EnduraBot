@@ -65,6 +65,9 @@ class bot_react(commands.Cog):
         
         if any(role.id == sysop_role_id for role in message.author.roles):
            return
+        
+        if message.author.bot:
+            return
 
         if any(servers in message.content.lower() for servers in servers) and any(identifiers in message.content.lower() for identifiers in identifiers):
             await message.delete()
