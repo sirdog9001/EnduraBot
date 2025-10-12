@@ -7,6 +7,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord import app_commands, AllowedMentions
+import datetime
+from datetime import datetime, timezone, timedelta
 import random
 import json
 import re
@@ -81,14 +83,23 @@ class bible(commands.Cog):
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
         random_gospel = random.choice(self.gospels_data)
-        fetch_limit = 100 # Going too far back would be resource intensive
 
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
             return
 
+        # A date relatively close, but not too close, to the first OOC message.
+        old_date = datetime(2022, 3, 14, 0, 0, 0, tzinfo=timezone.utc) 
+
+        #Timezone declaration necessary to make this datetime object an 'aware' one.
+        current_date = datetime.now(timezone.utc)
+
+        num_days = current_date - old_date 
+
+        random_date = current_date - timedelta(days=random.randint(1, num_days.days)) #This selects the random date.
+
         msg_table = [
-            msg async for msg in ooc_channel.history(limit=fetch_limit)
+            msg async for msg in ooc_channel.history(limit=75, around=random_date)
             if not msg.author.bot
             and ( 
                 (msg.content and (
@@ -97,7 +108,11 @@ class bible(commands.Cog):
             )
         ]
 
-        selected_msg = random.choice(msg_table)
+        # If a situation were to ever somehow occur where msg_table comes empty, use a pre-selected message to keep things moving.
+        if not msg_table:
+            selected_msg = await ooc_channel.fetch_message(1426039544490229811)
+        else:       
+            selected_msg = random.choice(msg_table)
 
         match = re.search(r'''["](.+?)["]''', selected_msg.content) #Search for the quoted content
         extracted_quote = match.group(1).strip() if match else selected_msg.content.strip() #Strip everything that isn't the quoted content
