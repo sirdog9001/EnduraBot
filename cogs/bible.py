@@ -7,7 +7,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord import app_commands, AllowedMentions
-import datetime
 from datetime import datetime, timezone, timedelta
 import random
 import json
@@ -114,9 +113,10 @@ class bible(commands.Cog):
         else:       
             selected_msg = random.choice(msg_table)
 
-        match = re.search(r'''["](.+?)["]''', selected_msg.content) #Search for the quoted content
-        extracted_quote = match.group(1).strip() if match else selected_msg.content.strip() #Strip everything that isn't the quoted content
-        formatted_quote = f'"{extracted_quote}"' #Format the quoted content into quotations
+        all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
+        
+        extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
+        formatted_quote = f'"{extracted_quote}"'
 
         embed = discord.Embed(
             title="✝️ Bible Quote", 
