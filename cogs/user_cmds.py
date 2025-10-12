@@ -169,5 +169,55 @@ class user_cmds(commands.Cog):
         logger.critical(f"Emergency stop activated by {interaction.user.name}. Shutting down...")
         await self.bot.close()
 
+# --- COMMAND: /links ---
+
+    @app_commands.command(name="links", description="Quick access to EDC relevant links.")
+    @app_commands.guilds(GUILD_ID)
+    async def links(self, interaction: discord.Interaction):
+
+        links_list = self.settings_data.get("edc_links", {})
+
+        embed = discord.Embed(
+            title="Endurance Coalition Links",
+            color=discord.Color.purple()
+        )
+
+        for url, description in links_list.items():
+            embed.add_field(
+                name=description,
+                value=url,
+                inline=False
+            )
+        
+        await interaction.response.send_message(embed=embed)
+
+        return
+    
+# --- COMMAND: /ips ---
+
+    @app_commands.command(name="ips", description="Quick access to EDC relevant IPs and ports.")
+    @app_commands.guilds(GUILD_ID)
+    async def ips(self, interaction: discord.Interaction):
+
+        ports_list = self.settings_data.get("edc_ports", {})
+        edc_ip = self.settings_data.get("edc_ip")
+
+        embed = discord.Embed(
+            title="Endurance Coalition IP Addresses",
+            description=f"Most games should accept `edcgaming.org` as our IP address. Just append the port to the end like usual.\n\n If for some reason that does not work, our *raw* IP is `{edc_ip}`.",
+            color=discord.Color.blue()
+        )
+
+        for game, port in ports_list.items():
+            embed.add_field(
+                name=game,
+                value=port,
+                inline=False
+            )
+        
+        await interaction.response.send_message(embed=embed)
+
+        return
+        
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
