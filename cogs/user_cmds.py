@@ -169,5 +169,29 @@ class user_cmds(commands.Cog):
         logger.critical(f"Emergency stop activated by {interaction.user.name}. Shutting down...")
         await self.bot.close()
 
+# --- COMMAND: /links ---
+
+    @app_commands.command(name="links", description="Quick access to EDC relevant links.")
+    @app_commands.guilds(GUILD_ID)
+    async def links(self, interaction: discord.Interaction):
+
+        links_list = self.settings_data.get("edc_links", {})
+
+        embed = discord.Embed(
+            title="Endurance Coalition Links List",
+            color=discord.Color.purple()
+        )
+
+        for url, description in links_list.items():
+            embed.add_field(
+                name=description,
+                value=url,
+                inline=False
+            )
+        
+        await interaction.response.send_message(embed=embed)
+
+        return
+        
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
