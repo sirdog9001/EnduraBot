@@ -34,23 +34,16 @@ def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown |
     return app_commands.Cooldown(1, cog_instance.cooldown)
 
 class rquote(commands.Cog):
-    
-    # --- Initialize class ---
-
     def __init__(self, bot):
         self.bot = bot
         self.variables_file = {}
     
-        # Allow EnduraBot in this cog to ping roles and users.
         self.default_allowed_mentions = AllowedMentions(
-                everyone=False,  # Don't ping @everyone or @here by default
-                users=True,      # Allow user mentions (like interaction.user.mention)
-                roles=True       # Explicitly allow role mentions to trigger pings
+                everyone=False,
+                users=True, 
+                roles=True      
             )
         
-    # --- Load JSON files ---
-
-        # Settings
         try:
             with open(VARIABLES_FILE, 'r') as file_object:
                 self.settings_data = json.load(file_object)
@@ -62,7 +55,6 @@ class rquote(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
             return
         
-        # Misc text
         try:
             with open(MISC_FILE, 'r') as file_object:
                 self.misc_data = json.load(file_object)
@@ -72,7 +64,9 @@ class rquote(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
             return
 
+
     # --- COMMAND: /rquote ---
+
 
     @app_commands.command(name="rquote", description="Take an out of context quote and give it the wrong context.")
     @app_commands.guilds(GUILD_ID)
@@ -82,22 +76,16 @@ class rquote(commands.Cog):
         
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
-        selected_theme = random.choice(['hr', 'court', 'dating'])
 
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
             return
 
-        # A date relatively close, but not too close, to the first OOC message.
-        old_date = datetime(2022, 3, 14, 0, 0, 0, tzinfo=timezone.utc) 
-
-        # Timezone declaration necessary to make this datetime object an 'aware' one.
-        current_date = datetime.now(timezone.utc)
-
-        num_days = current_date - old_date 
+        # Current date - date roughly close to the first quote in #out-of-context
+        num_days = datetime.now(timezone.utc) - datetime(2022, 3, 14, 0, 0, 0, tzinfo=timezone.utc)
 
         # This selects the random date.
-        random_date = current_date - timedelta(days=random.randint(1, num_days.days)) 
+        random_date = datetime.now(timezone.utc) - timedelta(days=random.randint(1, num_days.days))
 
         msg_table = [
             msg async for msg in ooc_channel.history(limit=75, around=random_date)
@@ -120,7 +108,11 @@ class rquote(commands.Cog):
         formatted_quote = f'"{extracted_quote}"'
 
 
-        if selected_theme == 'hr': # Human resources theme
+        # Select a random theme.
+        selected_theme = random.choice(['hr', 'court', 'dating'])
+
+        # --- HUMAN RESOURCES THEME ---
+        if selected_theme == 'hr': 
 
             random_opener = random.choice(self.misc_data["ooc_hr"])
 
@@ -131,8 +123,9 @@ class rquote(commands.Cog):
                 )
             embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
             await interaction.response.send_message(embed=embed)
-
-        elif selected_theme == 'dating': # Dating theme
+       
+        # --- DATING THEME ---
+        elif selected_theme == 'dating':
 
             random_opener = random.choice(self.misc_data["ooc_dating"])
 
@@ -144,7 +137,8 @@ class rquote(commands.Cog):
             embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
             await interaction.response.send_message(embed=embed)
 
-        elif selected_theme == 'court': # Court theme
+        # --- COURT THEME ---
+        elif selected_theme == 'court':
 
             random_opener = random.choice(self.misc_data["ooc_court"])
 

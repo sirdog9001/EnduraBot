@@ -20,21 +20,15 @@ GUILD_ID = int(os.getenv('guild'))
 VARIABLES_FILE = "data/variables.json"
 
 class user_cmds(commands.Cog):
-    
-    # --- Initialize class ---
-
     def __init__(self, bot):
         self.bot = bot
         self.variables_file = {}
     
-        # Allow EnduraBot in this cog to ping roles and users.
         self.default_allowed_mentions = AllowedMentions(
-                everyone=False,  # Don't ping @everyone or @here by default
-                users=True,      # Allow user mentions (like interaction.user.mention)
-                roles=True       # Explicitly allow role mentions to trigger pings
+                everyone=False,
+                users=True, 
+                roles=True      
             )
-        
-    # --- Load JSON ---
 
         try:
             with open(VARIABLES_FILE, 'r') as file_object:
@@ -56,13 +50,10 @@ class user_cmds(commands.Cog):
         create_epoch = round(user.created_at.timestamp()) #Get UNIX timestamp for when the member's account was created.
         join_epoch = round(user.joined_at.timestamp()) #Get UNIX timestamp for when member joined the Discord.
         role_ids = [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"] #Get list of all role IDs the user has, excluding the default @@everyone role.
-        sysop_role_id = self.settings_data.get("sysop_role_id") #Get SYSOP role ID from JSON.
-        mod_role_id = self.settings_data.get("mod_role_id") #Get mod role ID from JSON.
-        admin_role_id = self.settings_data.get("admin_role_id") #Get admin role ID from JSON.
 
-        guild_sysop_role = discord.utils.get(interaction.guild.roles, id=sysop_role_id)
-        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
-        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
+        guild_sysop_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id"))
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
+        guild_mod_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id"))
 
         if guild_sysop_role in user.roles:
             is_sysop = ":white_check_mark:"
@@ -86,7 +77,6 @@ class user_cmds(commands.Cog):
             embed.add_field(name="Roles", value="None", inline=False)
         else:
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
-            
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -121,13 +111,9 @@ class user_cmds(commands.Cog):
     
     async def alert(self, interaction: discord.Interaction, desc: str):
 
-        sailor_role_id = self.settings_data.get("sailor_role_id") #Get mod role ID from JSON.
-        sysop_role_id = self.settings_data.get("sysop_role_id")
-        alert_channel_id = self.settings_data.get("alert_channel_id")
-        guild_sailor_role = discord.utils.get(interaction.guild.roles, id=sailor_role_id)
-        guild_alert_channel = self.bot.get_channel(alert_channel_id)
-        sysop_role = interaction.guild.get_role(sysop_role_id)
-        
+        guild_sailor_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sailor_role_id"))
+        guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
+        sysop_role = interaction.guild.get_role(self.settings_data.get("sysop_role_id"))
 
         # Only allow sailors to use this command.
         if not guild_sailor_role in interaction.user.roles:

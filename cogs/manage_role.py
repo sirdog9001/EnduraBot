@@ -20,21 +20,15 @@ GUILD_ID = int(os.getenv('guild'))
 VARIABLES_FILE = "data/variables.json"
 
 class manage_role(commands.Cog):
-    
-    # --- Initialize class ---
-
     def __init__(self, bot):
         self.bot = bot
         self.variables_file = {}
     
-        # Allow EnduraBot in this cog to ping roles and users.
         self.default_allowed_mentions = AllowedMentions(
-                everyone=False,  # Don't ping @everyone or @here by default
-                users=True,      # Allow user mentions (like interaction.user.mention)
-                roles=True       # Explicitly allow role mentions to trigger pings
+                everyone=False,
+                users=True, 
+                roles=True      
             )
-        
-    # --- Load JSON ---
 
         try:
             with open(VARIABLES_FILE, 'r') as file_object:
@@ -45,16 +39,15 @@ class manage_role(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
             return    
 
-    # --- COMMAND: /editrole
+
+    # --- COMMAND: /editrole ---
 
 
     @app_commands.command(name="editrole", description="Give or revoke roles.")
     @app_commands.guilds(GUILD_ID)
     async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role):
-        mod_role_id = self.settings_data.get("mod_role_id")
-        admin_role_id = self.settings_data.get("admin_role_id")
-        guild_mod_role = discord.utils.get(interaction.guild.roles, id=mod_role_id)
-        guild_admin_role = discord.utils.get(interaction.guild.roles, id=admin_role_id)
+        guild_mod_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id"))
+        guild_admin_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
 
         # If not a moderator or administrator, reject.
         if not guild_mod_role in interaction.user.roles and not guild_admin_role in interaction.user.roles:
