@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 GUILD_ID = int(os.getenv('guild'))
 
 VARIABLES_FILE = "data/variables.json"
-TRIGGERS_FILE = "data/alert_trigger_tables.json"
+MISC_FILE = "data/misc_text.json"
 
 class bot_react(commands.Cog):
  # --- Initialize class ---
@@ -44,12 +44,12 @@ class bot_react(commands.Cog):
             return
         
         try:
-            with open(TRIGGERS_FILE, 'r') as file_object:
-                self.triggers_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded triggers from {TRIGGERS_FILE}")
+            with open(MISC_FILE, 'r') as file_object:
+                self.misc_data = json.load(file_object)
+                logger.info(f"[{self.__class__.__name__}] Successfully miscellaneous text from {MISC_FILE}")
         
         except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {TRIGGERS_FILE} not found.")
+            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
             return
 
 
@@ -57,8 +57,8 @@ class bot_react(commands.Cog):
     async def on_message(self, message: discord.Message):
     
         sysop_role_id = self.settings_data.get("sysop_role_id")
-        identifiers = self.triggers_data.get("issue_identifiers", [])
-        servers = self.triggers_data.get("server_identifiers", [])
+        identifiers = self.misc_data.get("issue_identifiers", [])
+        servers = self.misc_data.get("server_identifiers", [])
 
         if not any(role.id == sysop_role_id for role in message.role_mentions):
             return

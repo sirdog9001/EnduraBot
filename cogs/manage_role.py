@@ -18,7 +18,6 @@ logger.setLevel(logging.INFO)
 GUILD_ID = int(os.getenv('guild'))
 
 VARIABLES_FILE = "data/variables.json"
-EDITABLE_ROLES = "data/editable_roles.json"
 
 class manage_role(commands.Cog):
     
@@ -44,18 +43,7 @@ class manage_role(commands.Cog):
         
         except FileNotFoundError:
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
-            return
-        
-        try:
-            with open(EDITABLE_ROLES, 'r') as file_object:
-                self.editable_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {EDITABLE_ROLES}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {EDITABLE_ROLES} not found.")
-            return
-        
-
+            return    
 
     # --- COMMAND: /editrole
 
@@ -74,7 +62,7 @@ class manage_role(commands.Cog):
             return
 
         # If the role is not editable AND the executor is not an administrator, reject. If an administrator, approve.
-        if role.id not in self.editable_data.values() and not guild_admin_role in interaction.user.roles:
+        if role.id not in self.settings_data.get("mod_editable_roles").values() and not guild_admin_role in interaction.user.roles:
             await interaction.response.send_message("You do not have permission to edit this role.", ephemeral=True)
             return
         

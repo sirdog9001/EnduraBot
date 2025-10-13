@@ -1,17 +1,36 @@
 {
-    "repo": "https://github.com/sirdog9001/EnduraBot",
-    "version": 0,
-    "out_of_context_channel_id": 0,
-    "alert_channel_id": 0,
-    "based_chat_channel_id": 0,
-    "sysop_role_id": 0,
-    "mod_role_id": 0,
-    "admin_role_id": 0,
-    "roach_cock_role_id": 0,
-    "L_role_id": 0,
-    "sailor_role_id": 0,
+    "repo": "https://github.com/dummyuser/dummyrepo",
+    "version": "2.0-beta",
+    "out_of_context_channel_id": 9876543210987654321,
+    "alert_channel_id": 1234567890123456789,
+    "based_chat_channel_id": 2345678901234567890,
+    "sysop_role_id": 3456789012345678901,
+    "mod_role_id": 4567890123456789012,
+    "admin_role_id": 5678901234567890123,
+    "roach_cock_role_id": 6789012345678901234,
+    "L_role_id": 7890123456789012345,
+    "sailor_role_id": 8901234567890123456,
     "cooldown_exempt_roles": [
-        0,
-        0
-    ]
+        9012345678901234567,
+        1023456789012345678
+    ],
+    "edc_links": {
+        "https://dummygaming.org": "Dummy Gaming Main Site",
+        "https://wiki.dummygaming.org": "Dummy Gaming Wiki Archive",
+        "https://foundryvtt.dummygaming.org": "Virtual Tabletop for Pretend Adventures",
+        "https://127.0.0.1:8080": "Localhost Development Port",
+        "https://github.com/dummyuser/dummyrepo": "DummyBot GitHub Source"
+    },
+    "edc_ip": "192.168.1.100",
+    "edc_ports": {
+        "Dummy Game Alpha": 1234,
+        "Dummy Game Beta": 5678,
+        "Dummy Game Gamma": 9012,
+        "Dummy Game Delta": 3456
+    },
+    "mod_editable_roles": {
+        "dummy_role_a": 1122334455667788990,
+        "dummy_role_b": 2233445566778899001,
+        "dummy_role_c": 3344556677889900112
+    }
 }

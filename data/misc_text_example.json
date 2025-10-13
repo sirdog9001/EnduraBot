@@ -1,0 +1,23 @@
+{
+    "bible_gospels": [
+        "Proverbs 16:9",
+        "John 3:16",
+        "Romans 8:28",
+        "Philippians 4:13"
+    ],
+    "daily_bible_openers": [
+        "Congregation, quiet your spirits, for the very voice of the Lord God Almighty echoes now:",
+        "I hear it! A direct word from heaven, cutting through the noise, proclaiming this truth:",
+        "Every ear, every heart! For the Spirit of the Living God is about to thunder His decree:"     
+    ],
+    "server_identifiers": [
+        "arma",
+        "mordhau",
+        "garry's mod"
+    ],
+    "issue_identifiers": [
+        "broken",
+        "borked",
+        "issue"
+    ]
+}
