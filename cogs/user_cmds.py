@@ -73,7 +73,7 @@ class user_cmds(commands.Cog):
         embed.add_field(name="Backend Operator?", value=is_sysop)
         embed.add_field(name="Server Staff?", value=is_staff)
         
-        if len(user.roles) - 1 == 1: #We do -1 to exclude @@everyone.
+        if len(user.roles) == 1: #We do -1 to exclude @@everyone.
             embed.add_field(name="Roles", value="None", inline=False)
         else:
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
