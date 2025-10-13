@@ -21,19 +21,16 @@ VARIABLES_FILE = "data/variables.json"
 MISC_FILE = "data/misc_text.json"
 
 class bot_react(commands.Cog):
- # --- Initialize class ---
-
     def __init__(self, bot):
         self.bot = bot
         self.variables_file = {}
     
         self.default_allowed_mentions = AllowedMentions(
-                everyone=False,  # Don't ping @everyone or @here by default
-                users=True,      # Allow user mentions (like interaction.user.mention)
-                roles=True       # Explicitly allow role mentions to trigger pings
+                everyone=False,
+                users=True, 
+                roles=True      
             )
         
-        # Load the variables.json file.
         try:
             with open(VARIABLES_FILE, 'r') as file_object:
                 self.settings_data = json.load(file_object)
@@ -46,7 +43,7 @@ class bot_react(commands.Cog):
         try:
             with open(MISC_FILE, 'r') as file_object:
                 self.misc_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully miscellaneous text from {MISC_FILE}")
+                logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
         
         except FileNotFoundError:
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
