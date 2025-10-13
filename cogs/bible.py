@@ -24,7 +24,7 @@ MISC_FILE = "data/misc_text.json"
 
 def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown | None:
 
-    cog_instance = interaction.client.get_cog('bible')
+    cog_instance = interaction.client.get_cog('rquote')
 
     user_role_ids = {role.id for role in interaction.user.roles}
 
@@ -33,7 +33,7 @@ def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown |
     
     return app_commands.Cooldown(1, cog_instance.cooldown)
 
-class bible(commands.Cog):
+class rquote(commands.Cog):
     
     # --- Initialize class ---
 
@@ -62,7 +62,7 @@ class bible(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
             return
         
-        # Bible gospels
+        # Misc text
         try:
             with open(MISC_FILE, 'r') as file_object:
                 self.misc_data = json.load(file_object)
@@ -72,17 +72,17 @@ class bible(commands.Cog):
             logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
             return
 
-    # --- COMMAND: /bibleq ---
+    # --- COMMAND: /rquote ---
 
-    @app_commands.command(name="bibleq", description="Generate a totally legitimate Bible quote.")
+    @app_commands.command(name="rquote", description="Take an out of context quote and give it the wrong context.")
     @app_commands.guilds(GUILD_ID)
     @app_commands.checks.dynamic_cooldown(custom_cooldown)
 
-    async def bibleq(self, interaction: discord.Interaction):
+    async def rquote(self, interaction: discord.Interaction):
         
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
-        random_gospel = random.choice(self.misc_data["bible_gospels"])
+        selected_theme = random.choice(['hr', 'court', 'dating'])
 
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
@@ -91,12 +91,13 @@ class bible(commands.Cog):
         # A date relatively close, but not too close, to the first OOC message.
         old_date = datetime(2022, 3, 14, 0, 0, 0, tzinfo=timezone.utc) 
 
-        #Timezone declaration necessary to make this datetime object an 'aware' one.
+        # Timezone declaration necessary to make this datetime object an 'aware' one.
         current_date = datetime.now(timezone.utc)
 
         num_days = current_date - old_date 
 
-        random_date = current_date - timedelta(days=random.randint(1, num_days.days)) #This selects the random date.
+        # This selects the random date.
+        random_date = current_date - timedelta(days=random.randint(1, num_days.days)) 
 
         msg_table = [
             msg async for msg in ooc_channel.history(limit=75, around=random_date)
@@ -115,20 +116,48 @@ class bible(commands.Cog):
             selected_msg = random.choice(msg_table)
 
         all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
-        
         extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
         formatted_quote = f'"{extracted_quote}"'
 
-        embed = discord.Embed(
-            title="✝️ Bible Quote", 
-            description=f"{formatted_quote}\n\n —**{random_gospel}**",
-            color=discord.Color.purple()
-            )
-        embed.set_footer(text="This quote is not representative of the Endurance Coalition's values.")
-        await interaction.response.send_message(embed=embed)
 
-    @bibleq.error
-    async def bibleq_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if selected_theme == 'hr': # Human resources theme
+
+            random_opener = random.choice(self.misc_data["ooc_hr"])
+
+            embed = discord.Embed(
+                title="💼 HR Office of EDC, Inc.", 
+                description=f"{random_opener}\n\n>>> {formatted_quote}",
+                color=discord.Color.purple()
+                )
+            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+            await interaction.response.send_message(embed=embed)
+
+        elif selected_theme == 'dating': # Dating theme
+
+            random_opener = random.choice(self.misc_data["ooc_dating"])
+
+            embed = discord.Embed(
+                title="❤️‍🔥 A Love Story", 
+                description=f"{random_opener}\n\n>>> {formatted_quote}",
+                color=discord.Color.pink()
+                )
+            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+            await interaction.response.send_message(embed=embed)
+
+        elif selected_theme == 'court': # Court theme
+
+            random_opener = random.choice(self.misc_data["ooc_court"])
+
+            embed = discord.Embed(
+                title="⚖️ EDC Court of Appeals", 
+                description=f"{random_opener}\n\n>>> {formatted_quote}",
+                color=15086336
+                )
+            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+            await interaction.response.send_message(embed=embed)
+
+    @rquote.error
+    async def rquote_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CommandOnCooldown):
             minutes, seconds = divmod(int(error.retry_after), 60)
             if minutes > 0:
@@ -137,4 +166,4 @@ class bible(commands.Cog):
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
 
 async def setup(bot):
-    await bot.add_cog(bible(bot))
+    await bot.add_cog(rquote(bot))
