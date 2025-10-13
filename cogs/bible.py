@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 GUILD_ID = int(os.getenv('guild'))
 
 VARIABLES_FILE = "data/variables.json"
-GOSPELS_FILE = "data/bible_gospels.json"
+MISC_FILE = "data/misc_text.json"
 
 
 def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown | None:
@@ -63,12 +63,12 @@ class bible(commands.Cog):
         
         # Bible gospels
         try:
-            with open(GOSPELS_FILE, 'r') as file_object:
-                self.gospels_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded gospel names from {GOSPELS_FILE}")
+            with open(MISC_FILE, 'r') as file_object:
+                self.misc_data = json.load(file_object)
+                logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
         
         except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {GOSPELS_FILE} not found.")
+            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
             return
 
     # --- COMMAND: /bibleq ---
@@ -81,7 +81,7 @@ class bible(commands.Cog):
         
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
-        random_gospel = random.choice(self.gospels_data)
+        random_gospel = random.choice(self.misc_data["bible_gospels"])
 
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)

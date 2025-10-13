@@ -18,8 +18,7 @@ logger.setLevel(logging.INFO)
 GUILD_ID = int(os.getenv('guild'))
 
 VARIABLES_FILE = "data/variables.json"
-GOSPELS_FILE = "data/bible_gospels.json"
-OPENERS_FILE = "data/daily_bible_openers.json"
+MISC_FILE = "data/misc_text.json"
 
 class bible_daily(commands.Cog):
         def __init__(self, bot):
@@ -39,21 +38,12 @@ class bible_daily(commands.Cog):
                 return
             
             try:
-                with open(GOSPELS_FILE, 'r') as file_object:
-                    self.gospels_data = json.load(file_object)
-                    logger.info(f"[{self.__class__.__name__}] Successfully loaded gospel names from {GOSPELS_FILE}")
+                with open(MISC_FILE, 'r') as file_object:
+                    self.misc_data = json.load(file_object)
+                    logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
             
             except FileNotFoundError:
-                logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {GOSPELS_FILE} not found.")
-                return
-            
-            try:
-                with open(OPENERS_FILE, 'r') as file_object:
-                    self.openers_data = json.load(file_object)
-                    logger.info(f"[{self.__class__.__name__}] Successfully loaded gospel openers from {OPENERS_FILE}")
-            
-            except FileNotFoundError:
-                logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {OPENERS_FILE} not found.")
+                logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
                 return
 
 
@@ -68,8 +58,8 @@ class bible_daily(commands.Cog):
             based_chat_channel = self.bot.get_channel(self.settings_data.get("based_chat_channel_id"))
             ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
             ooc_channel = self.bot.get_channel(ooc_channel_id)
-            random_gospel = random.choice(self.gospels_data)
-            random_opener = random.choice(self.openers_data)
+            random_gospel = random.choice(self.misc_data["bible_gospels"])
+            random_opener = random.choice(self.misc_data["daily_bible_openers"])
 
             # A date relatively close, but not too close, to the first OOC message.
             old_date = datetime(2022, 3, 14, 0, 0, 0, tzinfo=timezone.utc) 
