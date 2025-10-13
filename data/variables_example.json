@@ -22,6 +22,7 @@
         "https://github.com/dummyuser/dummyrepo": "DummyBot GitHub Source"
     },
     "edc_ip": "192.168.1.100",
+    "rquote_cooldown_in_minutes": 1800,
     "edc_ports": {
         "Dummy Game Alpha": 1234,
         "Dummy Game Beta": 5678,
@@ -33,4 +34,5 @@
         "dummy_role_b": 2233445566778899001,
         "dummy_role_c": 3344556677889900112
     }
+
 }
