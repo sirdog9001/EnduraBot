@@ -19,5 +19,17 @@
         "broken",
         "borked",
         "issue"
-    ]
+    ],
+      "ooc_dating": [
+        "Oh, darling! You know I fell for you when you said:",
+        "I'll never forget our first date. My heart skipped a beat when you leaned in and whispered:"
+  ],
+      "ooc_court": [
+        "Let the record reflect that the defendant said:",
+        "Your Honor, the prosecution's entire case rests on the defendant's baffling admission, and I quote:"
+  ],
+      "ooc_hr": [
+        "Thank you for coming in. I know this was sudden, but we've heard rumors that you said something... odd. Quote:",
+        "So, regarding your contribution to the Q&A at the all-hands meeting, specifically when you took the mic and announced:"
+  ]
 }
