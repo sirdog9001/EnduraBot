@@ -31,7 +31,7 @@ def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown |
     if not cog_instance.exempt_role_ids.isdisjoint(user_role_ids):
         return None
     
-    return app_commands.Cooldown(1, 1800)
+    return app_commands.Cooldown(1, cog_instance.cooldown)
 
 class bible(commands.Cog):
     
@@ -55,6 +55,7 @@ class bible(commands.Cog):
             with open(VARIABLES_FILE, 'r') as file_object:
                 self.settings_data = json.load(file_object)
                 self.exempt_role_ids = set(self.settings_data.get("cooldown_exempt_roles"))
+                self.cooldown = self.settings_data.get("rquote_cooldown_in_minutes")
                 logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
         
         except FileNotFoundError:
