@@ -19,7 +19,7 @@ Contributions are welcome! If you have suggestions, bug reports, or want to cont
 ## 🛠️ Installation
 This bot is provided with an MIT license in the spirit of making non-critical software free and open source. 
 
-While reaching I am not against people reaching out, I make no gaurantee of a reply, nor do I gaurantee support with attempts to run EnduraBot elsewhere.
+While I am not against people reaching out, I make no gaurantee of a reply, nor do I gaurantee support with attempts to run EnduraBot elsewhere.
 
 
 ## 🤖 Artificial Intelligence
