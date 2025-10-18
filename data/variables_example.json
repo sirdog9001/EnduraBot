@@ -33,6 +33,22 @@
         "dummy_role_a": 1122334455667788990,
         "dummy_role_b": 2233445566778899001,
         "dummy_role_c": 3344556677889900112
+    },
+    "rquote_themes": {
+        "hr": {
+            "title": "💼 HR Office of EDC, Inc.",
+            "color": 10181046,
+            "opener_key": "ooc_hr"
+        },
+        "dating": {
+            "title": "❤️‍🔥 A Love Story",
+            "color": 15277667,
+            "opener_key": "ooc_dating"
+        },
+        "court": {
+            "title": "⚖️ EDC Court of Appeals",
+            "color": 15086336,
+            "opener_key": "ooc_court"
+        }
     }
-
 }

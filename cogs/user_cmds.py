@@ -31,7 +31,7 @@ class user_cmds(commands.Cog):
             )
 
         try:
-            with open(VARIABLES_FILE, 'r') as file_object:
+            with open(VARIABLES_FILE, 'r', encoding='utf-8') as file_object:
                 self.settings_data = json.load(file_object)
                 logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
         
