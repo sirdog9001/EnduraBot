@@ -90,6 +90,10 @@ class bible_daily(commands.Cog):
             color=discord.Color.purple()
             )
         embed.set_footer(text="This quote is not representative of the Endurance Coalition's values.")
+        
+        if selected_msg.attachments:
+            embed.set_image(url=selected_msg.attachments[0].url)
+
         await based_chat_channel.send(content=f"# ✝️ Bible Quote of the Day\n\n:palms_up_together: {random_opener}", embed=embed)
 
     @daily_bible_quote.before_loop
