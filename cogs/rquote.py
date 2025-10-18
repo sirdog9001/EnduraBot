@@ -45,10 +45,11 @@ class rquote(commands.Cog):
             )
         
         try:
-            with open(VARIABLES_FILE, 'r') as file_object:
+            with open(VARIABLES_FILE, 'r', encoding='utf-8') as file_object:
                 self.settings_data = json.load(file_object)
                 self.exempt_role_ids = set(self.settings_data.get("cooldown_exempt_roles"))
                 self.cooldown = self.settings_data.get("rquote_cooldown_in_minutes")
+                self.themes = self.settings_data["rquote_themes"]
                 logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
         
         except FileNotFoundError:
@@ -107,48 +108,19 @@ class rquote(commands.Cog):
         extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
         formatted_quote = f'"{extracted_quote}"'
 
+        # Select a random theme and appropriate opening text
+        selected_theme_data = self.themes[random.choice(list(self.themes.keys()))]
+        opener_key_from_json = selected_theme_data["opener_key"]
+        random_opener = random.choice(self.misc_data[opener_key_from_json])
 
-        # Select a random theme.
-        selected_theme = random.choice(['hr', 'court', 'dating'])
-
-        # --- HUMAN RESOURCES THEME ---
-        if selected_theme == 'hr': 
-
-            random_opener = random.choice(self.misc_data["ooc_hr"])
-
-            embed = discord.Embed(
-                title="💼 HR Office of EDC, Inc.", 
-                description=f"{random_opener}\n\n>>> {formatted_quote}",
-                color=discord.Color.purple()
-                )
-            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
-            await interaction.response.send_message(embed=embed)
-       
-        # --- DATING THEME ---
-        elif selected_theme == 'dating':
-
-            random_opener = random.choice(self.misc_data["ooc_dating"])
-
-            embed = discord.Embed(
-                title="❤️‍🔥 A Love Story", 
-                description=f"{random_opener}\n\n>>> {formatted_quote}",
-                color=discord.Color.pink()
-                )
-            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
-            await interaction.response.send_message(embed=embed)
-
-        # --- COURT THEME ---
-        elif selected_theme == 'court':
-
-            random_opener = random.choice(self.misc_data["ooc_court"])
-
-            embed = discord.Embed(
-                title="⚖️ EDC Court of Appeals", 
-                description=f"{random_opener}\n\n>>> {formatted_quote}",
-                color=15086336
-                )
-            embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
-            await interaction.response.send_message(embed=embed)
+        embed = discord.Embed(
+            title=selected_theme_data["title"], 
+            description=f"{random_opener}\n\n>>> {formatted_quote}",
+            color=selected_theme_data["color"]
+            )
+        
+        embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+        await interaction.response.send_message(embed=embed)
 
     @rquote.error
     async def rquote_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
