@@ -120,6 +120,10 @@ class rquote(commands.Cog):
             )
         
         embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+
+        if selected_msg.attachments:
+            embed.set_image(url=selected_msg.attachments[0].url)
+
         await interaction.response.send_message(embed=embed)
 
     @rquote.error
