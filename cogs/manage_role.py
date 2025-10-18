@@ -54,14 +54,9 @@ class manage_role(commands.Cog):
             await interaction.response.send_message("Access denied.", ephemeral=True)
             return
 
-        # If the role is not editable AND the executor is not an administrator, reject. If an administrator, approve.
-        if role.id not in self.settings_data.get("mod_editable_roles").values() and not guild_admin_role in interaction.user.roles:
-            await interaction.response.send_message("You do not have permission to edit this role.", ephemeral=True)
-            return
-        
-        # Disallow messing with the admin or mod roles for security reasons.
-        if role == guild_mod_role or role == guild_admin_role:
-            await interaction.response.send_message("Adjusting the mod or admin roles with EnduraBot is restricted for security purposes.", ephemeral=True)
+        # If the role is not editable, reject.
+        if role.id not in self.settings_data.get("mod_editable_roles").values():
+            await interaction.response.send_message(f"{role.mention} is not on the approved list of editable roles.", ephemeral=True)
             return
         
         # Change roles.
