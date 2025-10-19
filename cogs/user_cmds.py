@@ -9,7 +9,8 @@ from discord import app_commands
 from discord import app_commands, AllowedMentions
 import json
 import logging
-from config_loader import SETTINGS_DATA
+import config_loader
+from config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
@@ -21,6 +22,9 @@ class user_cmds(commands.Cog):
         self.bot = bot
         self.variables_file = {}
         self.settings_data = SETTINGS_DATA
+        self.misc_data = MISC_DATA
+        self.settings_data_g = config_loader.SETTINGS_DATA
+        self.misc_data_g = config_loader.MISC_DATA
     
         self.default_allowed_mentions = AllowedMentions(
                 everyone=False,
@@ -193,6 +197,26 @@ class user_cmds(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
         return
+    
+# --- COMMAND: /rconfig ---
+    @app_commands.command(name="rconfig", description="Dynamically reload EnduraBot's configuration.")
+    @app_commands.guilds(GUILD_ID)
+    async def rconfig(self, interaction: discord.Interaction):
+
+        guild_sysop_role =  discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id"))
+
+        if not guild_sysop_role in interaction.user.roles:
+            await interaction.response.send_message("Access denied.", ephemeral=True)
+            return
+
+        if config_loader.load_configs() and config_loader.load_misc():
+            self.settings_data_g = config_loader.SETTINGS_DATA
+            self.misc_data_g = config_loader.MISC_DATA
+            await interaction.response.send_message(":white_check_mark: Configuration successfully reloaded.", ephemeral=True)
+            logger.info(f"{interaction.user.name} reloaded all configuration.")
+        else:
+            await interaction.response.send_message(":x: Something went wrong. Review bot logs.", ephemeral=True)
+
         
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
