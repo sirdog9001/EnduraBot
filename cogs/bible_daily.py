@@ -6,8 +6,7 @@ import random
 import re
 from config_loader import SETTINGS_DATA, MISC_DATA
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger('endurabot.' + __name__)
 
 class bible_daily(commands.Cog):
     def __init__(self, bot):
@@ -48,6 +47,7 @@ class bible_daily(commands.Cog):
         # If a situation were to ever somehow occur where msg_table comes empty, use a pre-selected message to keep things moving.
         if not msg_table:
             selected_msg = await ooc_channel.fetch_message(1426039544490229811)
+            logger.error("msg_table interpreted as empty. Fallback message engaged.")
         else:       
             selected_msg = random.choice(msg_table)
 
@@ -67,6 +67,8 @@ class bible_daily(commands.Cog):
             embed.set_image(url=selected_msg.attachments[0].url)
 
         await based_chat_channel.send(content=f"# ✝️ Bible Quote of the Day\n\n:palms_up_together: {random_opener}", embed=embed)
+        logger.info("Daily bible quote sent.")
+        logger.debug(f"Daily bible quote sent. Channel: [#{based_chat_channel.name} ({based_chat_channel.id})]. Dated: [{selected_msg.created_at.strftime("%B %d, %Y")}]. Opener: [{random_opener}]. Gospel: [{random_gospel}]. Content: [{formatted_quote}].")
 
     @daily_bible_quote.before_loop
     async def before_daily_bible_quote(self):

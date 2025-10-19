@@ -1,4 +1,5 @@
 __pycache__/
 *.env
+*.log
 data/variables.json
 data/misc_text.json

@@ -4,8 +4,7 @@ from discord import AllowedMentions
 import logging
 from config_loader import SETTINGS_DATA, MISC_DATA
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('endurabot.' + __name__)
 
 class bot_react(commands.Cog):
     def __init__(self, bot):
@@ -42,6 +41,7 @@ class bot_react(commands.Cog):
                 description="An **automated filter** has detected that a recent ping was made to systems operators in relation to an issue with EDC services.\n\n The preferred method of reporting a service being down is `/alert`.",
                 color=8650752
             )
+            logger.info(f"{message.author.name} ({message.author.id}) triggered the /alert filter. Content: [{message.content}]")
             await message.channel.send(embed=embed)
         else:
             return

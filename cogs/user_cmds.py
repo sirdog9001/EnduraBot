@@ -11,9 +11,9 @@ import json
 import logging
 import config_loader
 from config_loader import SETTINGS_DATA, MISC_DATA
+from logging_setup import UNAUTHORIZED
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger('endurabot.' + __name__)
 
 GUILD_ID = int(os.getenv('guild'))
 
@@ -72,7 +72,7 @@ class user_cmds(commands.Cog):
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
-
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info on {user.name} ({user.id}).")
 
     # --- COMMAND: /about ---
 
@@ -94,6 +94,7 @@ class user_cmds(commands.Cog):
         embed.add_field(name="GitHub Repository", value=repo, inline=False)
 
         await interaction.response.send_message(embed=embed)
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /about in #{interaction.channel.name} ({interaction.channel.id}).")
 
 
     # --- COMMAND: /alert ---
@@ -111,6 +112,7 @@ class user_cmds(commands.Cog):
         # Only allow sailors to use this command.
         if not guild_sailor_role in interaction.user.roles:
             await interaction.response.send_message(content="Access denied.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted submit a systems operator alert with the context: [{desc}].")
             return
         
         await interaction.response.send_message(content="Your report has been submitted.", ephemeral=True)
@@ -118,6 +120,8 @@ class user_cmds(commands.Cog):
             content=f"# :rotating_light: INCIDENT ALERT :rotating_light:\n\n **Attention**: {sysop_role.mention}\n\n **Reporting User**: {interaction.user.mention} (from <#{interaction.channel.id}>) \n\n **Details**: \"{desc}\" \n\n Systems operator investigation requested! Please post in this channel and notify {interaction.user.mention} when investigation begins.", 
             allowed_mentions=self.default_allowed_mentions
             )
+        
+        logger.critical(f"{interaction.user.name} ({interaction.user.id}) submitted an alert to systems operators with the context: [{desc}].")
 
     # --- COMMAND: /estop ---
 
@@ -137,6 +141,7 @@ class user_cmds(commands.Cog):
 
         if not set(eligible_roles).intersection(interaction.user.roles):
             await interaction.response.send_message("Access denied.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to stop EnduraBot.")
             return
         
         await interaction.response.send_message(content=f"Emergency stop has been activated. Report sent to <#{guild_alert_channel.id}>.", ephemeral=True)
@@ -145,7 +150,7 @@ class user_cmds(commands.Cog):
             allowed_mentions=self.default_allowed_mentions
             )
         
-        logger.critical(f"Emergency stop activated by {interaction.user.name}. Shutting down...")
+        logger.critical(f"Emergency stop activated by {interaction.user.name} ({interaction.user.id}). Shutting down...")
         await self.bot.close()
 
 # --- COMMAND: /links ---
@@ -169,6 +174,7 @@ class user_cmds(commands.Cog):
             )
         
         await interaction.response.send_message(embed=embed)
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /links in #{interaction.channel.name} ({interaction.channel.id}).")
 
         return
     
@@ -195,6 +201,7 @@ class user_cmds(commands.Cog):
             )
         
         await interaction.response.send_message(embed=embed)
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /ips in #{interaction.channel.name} ({interaction.channel.id}).")
 
         return
     
@@ -207,15 +214,17 @@ class user_cmds(commands.Cog):
 
         if not guild_sysop_role in interaction.user.roles:
             await interaction.response.send_message("Access denied.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to reload configuration.")
             return
 
         if config_loader.load_configs() and config_loader.load_misc():
             self.settings_data_g = config_loader.SETTINGS_DATA
             self.misc_data_g = config_loader.MISC_DATA
             await interaction.response.send_message(":white_check_mark: Configuration successfully reloaded.", ephemeral=True)
-            logger.info(f"{interaction.user.name} reloaded all configuration.")
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) reloaded all configuration.")
         else:
             await interaction.response.send_message(":x: Something went wrong. Review bot logs.", ephemeral=True)
+            logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to reload configuration and got an error.")
 
         
 async def setup(bot):

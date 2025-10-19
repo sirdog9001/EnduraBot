@@ -1,21 +1,24 @@
 import os
 from dotenv import load_dotenv
-import logging
+from datetime import datetime
 
 load_dotenv()
-
-logger = logging.getLogger('discord')
-logger.setLevel(logging.DEBUG)
 
 import discord
 from discord.ext import commands
 
+# Setup logging
+import logging_setup
+logger = logging_setup.configure_logging()
+
+# Environment variable stuff
 BOT_TOKEN= os.getenv('bot_token')
 GUILD_ID = int(os.getenv('guild'))
 
 guild_object = discord.Object(id=GUILD_ID)
 whitelisted_guild_ids_str = os.getenv('guilds')
 
+# Intents
 intents = discord.Intents.default()
 intents.members = True         
 intents.presences = True        
@@ -50,6 +53,8 @@ async def on_ready():
         logger.info(f"Synced {len(synced)} commands.")
     except Exception as e:
         logger.critical("FATAL ERROR: ", e)    
+
+    logger.info("Hello, world! I am awake and ready to work!")
 
 bot.run(BOT_TOKEN)
 
