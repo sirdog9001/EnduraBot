@@ -32,9 +32,7 @@ class user_cmds(commands.Cog):
                 roles=True      
             )
 
-
     # --- COMMAND: /info ---
-
 
     @app_commands.command(name="info", description="Get information on a server member.")
     @app_commands.guilds(GUILD_ID)
@@ -76,7 +74,6 @@ class user_cmds(commands.Cog):
 
     # --- COMMAND: /about ---
 
-
     @app_commands.command(name="about", description="Get information about EnduraBot.")
     @app_commands.guilds(GUILD_ID)
     async def about(self, interaction: discord.Interaction):
@@ -92,13 +89,12 @@ class user_cmds(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
         embed.add_field(name="Version", value=version, inline=False)
         embed.add_field(name="GitHub Repository", value=repo, inline=False)
+        embed.add_field(name="Uptime", value=f"<t:{self.bot.initial_start_time}:R>")
 
         await interaction.response.send_message(embed=embed)
         logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /about in #{interaction.channel.name} ({interaction.channel.id}).")
 
-
     # --- COMMAND: /alert ---
-
 
     @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
     @app_commands.guilds(GUILD_ID)
@@ -177,7 +173,7 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /links in #{interaction.channel.name} ({interaction.channel.id}).")
 
         return
-    
+
 # --- COMMAND: /ips ---
 
     @app_commands.command(name="ips", description="Quick access to EDC relevant IPs and ports.")
@@ -204,8 +200,9 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /ips in #{interaction.channel.name} ({interaction.channel.id}).")
 
         return
-    
+
 # --- COMMAND: /rconfig ---
+
     @app_commands.command(name="rconfig", description="Dynamically reload EnduraBot's configuration.")
     @app_commands.guilds(GUILD_ID)
     async def rconfig(self, interaction: discord.Interaction):
