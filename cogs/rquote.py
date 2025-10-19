@@ -9,18 +9,14 @@ from discord import app_commands
 from discord import app_commands, AllowedMentions
 from datetime import datetime, timezone, timedelta
 import random
-import json
 import re
 import logging
+from config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
 
 GUILD_ID = int(os.getenv('guild'))
-
-VARIABLES_FILE = "data/variables.json"
-MISC_FILE = "data/misc_text.json"
-
 
 def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown | None:
 
@@ -36,7 +32,11 @@ def custom_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown |
 class rquote(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.variables_file = {}
+        self.settings_data = SETTINGS_DATA
+        self.exempt_role_ids = set(SETTINGS_DATA["cooldown_exempt_roles"])
+        self.cooldown = SETTINGS_DATA["rquote_cooldown_in_minutes"]
+        self.themes = SETTINGS_DATA["rquote_themes"]
+        self.misc_data = MISC_DATA
     
         self.default_allowed_mentions = AllowedMentions(
                 everyone=False,
@@ -44,27 +44,6 @@ class rquote(commands.Cog):
                 roles=True      
             )
         
-        try:
-            with open(VARIABLES_FILE, 'r', encoding='utf-8') as file_object:
-                self.settings_data = json.load(file_object)
-                self.exempt_role_ids = set(self.settings_data.get("cooldown_exempt_roles"))
-                self.cooldown = self.settings_data.get("rquote_cooldown_in_minutes")
-                self.themes = self.settings_data["rquote_themes"]
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
-            return
-        
-        try:
-            with open(MISC_FILE, 'r') as file_object:
-                self.misc_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
-            return
-
 
     # --- COMMAND: /rquote ---
 

@@ -1,54 +1,23 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import discord
 from discord.ext import commands
-from discord import app_commands
-from discord import app_commands, AllowedMentions
-import random
-import json
-import re
+from discord import AllowedMentions
 import logging
+from config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 
-GUILD_ID = int(os.getenv('guild'))
-
-VARIABLES_FILE = "data/variables.json"
-MISC_FILE = "data/misc_text.json"
-
 class bot_react(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.variables_file = {}
+        self.settings_data = SETTINGS_DATA
+        self.misc_data = MISC_DATA        
     
         self.default_allowed_mentions = AllowedMentions(
                 everyone=False,
                 users=True, 
                 roles=True      
             )
-        
-        try:
-            with open(VARIABLES_FILE, 'r', encoding='utf-8') as file_object:
-                self.settings_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
-            return
-        
-        try:
-            with open(MISC_FILE, 'r') as file_object:
-                self.misc_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
-            return
-
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
