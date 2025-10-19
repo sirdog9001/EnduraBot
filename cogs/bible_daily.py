@@ -1,54 +1,26 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import discord
 from datetime import datetime, time, timezone, timedelta
 from discord.ext import tasks, commands
-import json
 import logging
 import random
 import re
+from config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
-
-GUILD_ID = int(os.getenv('guild'))
-
-VARIABLES_FILE = "data/variables.json"
-MISC_FILE = "data/misc_text.json"
 
 class bible_daily(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.daily_bible_quote.start()
-        self.variables_file = {}
-
-        try:
-            with open(VARIABLES_FILE, 'r', encoding='utf-8') as file_object:
-                self.settings_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded settings from {VARIABLES_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {VARIABLES_FILE} not found.")
-            return
-        
-        try:
-            with open(MISC_FILE, 'r') as file_object:
-                self.misc_data = json.load(file_object)
-                logger.info(f"[{self.__class__.__name__}] Successfully loaded miscellaneous text from {MISC_FILE}")
-        
-        except FileNotFoundError:
-            logger.critical(f"[{self.__class__.__name__}] FATAL ERROR: {MISC_FILE} not found.")
-            return
-
+        self.settings_data = SETTINGS_DATA
+        self.misc_data = MISC_DATA
 
     def cog_unload(self):
         self.daily_bible_quote.cancel()
 
 
-    @tasks.loop(time=time(hour=16, minute=00, tzinfo=timezone.utc)) #Convert UTC to EST, so this should send at 12pm every day.
+    @tasks.loop(time=time(hour=SETTINGS_DATA["bibleq_hour_of_day"], minute=SETTINGS_DATA["bibleq_min_of_day"], tzinfo=timezone.utc)) #Convert UTC to EST, so this should send at 12pm every day.
     async def daily_bible_quote(self):
         await self.bot.wait_until_ready()
 
