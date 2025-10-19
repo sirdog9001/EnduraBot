@@ -25,6 +25,7 @@ intents.presences = True
 intents.message_content = True 
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+bot.initial_start_time = None
 
 @bot.event
 async def on_guild_join(guild):
@@ -55,6 +56,9 @@ async def on_ready():
         logger.critical("FATAL ERROR: ", e)    
 
     logger.info("Hello, world! I am awake and ready to work!")
+    
+    if bot.initial_start_time == None:
+        bot.initial_start_time = round(discord.utils.utcnow().timestamp())
 
 bot.run(BOT_TOKEN)
 
