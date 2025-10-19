@@ -9,9 +9,9 @@ from discord import app_commands
 from discord import app_commands, AllowedMentions
 import logging
 from config_loader import SETTINGS_DATA
+from logging_setup import UNAUTHORIZED
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger('endurabot.' + __name__)
 
 GUILD_ID = int(os.getenv('guild'))
 
@@ -39,11 +39,13 @@ class manage_role(commands.Cog):
         # If not a moderator or administrator, reject.
         if not guild_mod_role in interaction.user.roles and not guild_admin_role in interaction.user.roles:
             await interaction.response.send_message("Access denied.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to edit @{role.name} ({role.id}) for {user.name} ({user.id}).")
             return
 
         # If the role is not editable, reject.
         if role.id not in self.settings_data.get("mod_editable_roles").values():
             await interaction.response.send_message(f"{role.mention} is not on the approved list of editable roles.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"Staff member {interaction.user.name} ({interaction.user.id}) attempted to manipulate non-editable role @{role.name} ({role.id}) for {user.name} ({user.id}).")
             return
 
         # Change roles.
@@ -58,8 +60,10 @@ class manage_role(commands.Cog):
             
             if ping == True:    
                 await interaction.response.send_message(embed=embed, content=f"{user.mention}", allowed_mentions=self.default_allowed_mentions)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) removed @{role.name} ({role.id}) from {user.name} ({user.id}). Ping: [TRUE]")
             else:
                 await interaction.response.send_message(embed=embed)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) removed @{role.name} ({role.id}) from {user.name} ({user.id}). Ping: [FALSE]")
 
         else:
 
@@ -72,8 +76,10 @@ class manage_role(commands.Cog):
             
             if ping == True:    
                 await interaction.response.send_message(embed=embed, content=f"{user.mention}", allowed_mentions=self.default_allowed_mentions)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) added @{role.name} ({role.id}) to {user.name} ({user.id}). Ping: [TRUE]")
             else:
                 await interaction.response.send_message(embed=embed)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) added @{role.name} ({role.id}) to {user.name} ({user.id}). Ping: [FALSE]")
         
 async def setup(bot):
     await bot.add_cog(manage_role(bot))

@@ -12,9 +12,9 @@ import random
 import re
 import logging
 from config_loader import SETTINGS_DATA, MISC_DATA
+from logging_setup import COOLDOWN, UNAUTHORIZED
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger('endurabot.' + __name__)
 
 GUILD_ID = int(os.getenv('guild'))
 
@@ -60,8 +60,11 @@ class rquote(commands.Cog):
         ooc_channel_id = self.settings_data.get("out_of_context_channel_id")
         ooc_channel = self.bot.get_channel(ooc_channel_id)
 
+        has_attachment = False
+
         if interaction.channel.id == ooc_channel_id:
             await interaction.response.send_message("You may not generate quotes in the channel quotes come from.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to generate a quote in #{interaction.channel.name}.")
             return
 
         # Current date - date roughly close to the first quote in #out-of-context
@@ -104,18 +107,23 @@ class rquote(commands.Cog):
         embed.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
 
         if selected_msg.attachments:
+            has_attachment = True
             embed.set_image(url=selected_msg.attachments[0].url)
 
         await interaction.response.send_message(embed=embed)
-
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) generated a random quote in #{interaction.channel.name} ({interaction.channel.id}).")
+        logger.debug(f"{interaction.user.name} ({interaction.user.id}) generated a random quote. Channel: [#{interaction.channel.name} ({interaction.channel.id})]. Dated: [{selected_msg.created_at.strftime("%B %d, %Y")}]. Theme: [{selected_theme_data["title"]}]. Opener: [{random_opener}]. Content: [{formatted_quote}]. Attachment: [{has_attachment}].")
+    
     @rquote.error
     async def rquote_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CommandOnCooldown):
             minutes, seconds = divmod(int(error.retry_after), 60)
             if minutes > 0:
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {minutes} minute(s) and {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the cooldown with {minutes} minute(s) and {seconds} second(s) remaining.")
             else:
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the cooldown with {seconds} second(s) remaining.")
 
 async def setup(bot):
     await bot.add_cog(rquote(bot))
