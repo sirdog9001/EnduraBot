@@ -26,15 +26,16 @@ class manage_role(commands.Cog):
                 roles=True      
             )
 
+
     # --- COMMAND: /editrole ---
 
 
     @app_commands.command(name="editrole", description="Give or revoke roles.")
     @app_commands.guilds(GUILD_ID)
-    async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role):
+    async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role, ping: bool = False):
         guild_mod_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id"))
         guild_admin_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
-
+    
         # If not a moderator or administrator, reject.
         if not guild_mod_role in interaction.user.roles and not guild_admin_role in interaction.user.roles:
             await interaction.response.send_message("Access denied.", ephemeral=True)
@@ -44,14 +45,35 @@ class manage_role(commands.Cog):
         if role.id not in self.settings_data.get("mod_editable_roles").values():
             await interaction.response.send_message(f"{role.mention} is not on the approved list of editable roles.", ephemeral=True)
             return
-        
+
         # Change roles.
         if role in user.roles:
             await user.remove_roles(role)
-            await interaction.response.send_message(f"{user.mention} role **@{role.name}** has been removed.", allowed_mentions=self.default_allowed_mentions)
+
+            embed = discord.Embed(
+                title="⭕ Role Removed",
+                description=f"{role.mention} has been successfully removed from {user.mention}.",
+                color=8650752 
+                )
+            
+            if ping == True:    
+                await interaction.response.send_message(embed=embed, content=f"{user.mention}", allowed_mentions=self.default_allowed_mentions)
+            else:
+                await interaction.response.send_message(embed=embed)
+
         else:
+
             await user.add_roles(role)
-            await interaction.response.send_message(f"{user.mention} role **@{role.name}** has been added.", allowed_mentions=self.default_allowed_mentions)
+            embed = discord.Embed(
+                title="🟢 Role Added",
+                description=f"{role.mention} has been successfully added to {user.mention}.",
+                color=3800852 
+                )
+            
+            if ping == True:    
+                await interaction.response.send_message(embed=embed, content=f"{user.mention}", allowed_mentions=self.default_allowed_mentions)
+            else:
+                await interaction.response.send_message(embed=embed)
         
 async def setup(bot):
     await bot.add_cog(manage_role(bot))
