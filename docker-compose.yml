@@ -9,4 +9,7 @@ services:
     # Give a human-readable name to the running container
     container_name: EnduraBot
     # Automatically restart the container if it stops, unless explicitly told to stop
-    restart: unless-stopped
+    restart: on-failure
+    volumes:
+    - /home/sirdog/endurabot-dev/data:/app/data
+    - /home/sirdog/endurabot-dev/logs:/app/logs

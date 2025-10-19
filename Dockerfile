@@ -6,6 +6,10 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY main.py .
+COPY .env .
+COPY logging_setup.py .
+COPY config_loader.py .
+COPY cogs/ cogs/
 
 CMD ["python", "main.py"]
