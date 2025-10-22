@@ -5,10 +5,13 @@ from datetime import datetime
 load_dotenv()
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 # Setup logging
 import logging_setup
+from logging_setup import UNAUTHORIZED
+from config_loader import PERMS_DATA
 logger = logging_setup.configure_logging()
 
 # Environment variable stuff
@@ -70,6 +73,26 @@ async def on_ready():
 
     bot.invites = invites
 
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    
+    if interaction.response.is_done(): 
+        return
+    
+    if isinstance(error, app_commands.CheckFailure):
+
+        logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to run /{interaction.command.name}.")
+        
+        eligible_role_ids = PERMS_DATA.get(interaction.command.name, [])
+
+        embed = discord.Embed(
+            title=":octagonal_sign: Access denied.",
+            description=f"You do not possess access to run `/{interaction.command.name}`. Only members with the role(s) below may use this command.",
+            color=8650752
+        )
+        embed.add_field(name="Approved Role(s)", value=f"{' | '.join(f"<@&{role_id}>" for role_id in eligible_role_ids)}")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        return
 
 bot.run(BOT_TOKEN)
 

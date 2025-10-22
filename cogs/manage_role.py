@@ -10,6 +10,7 @@ from discord import app_commands, AllowedMentions
 import logging
 from config_loader import SETTINGS_DATA
 from logging_setup import UNAUTHORIZED
+from permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
@@ -31,16 +32,9 @@ class manage_role(commands.Cog):
 
 
     @app_commands.command(name="editrole", description="Give or revoke roles.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role, ping: bool = False):
-        guild_mod_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id"))
-        guild_admin_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
-    
-        # If not a moderator or administrator, reject.
-        if not guild_mod_role in interaction.user.roles and not guild_admin_role in interaction.user.roles:
-            await interaction.response.send_message("Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to edit @{role.name} ({role.id}) for {user.name} ({user.id}).")
-            return
 
         # If the role is not editable, reject.
         if role.id not in self.settings_data.get("mod_editable_roles").values():

@@ -12,6 +12,7 @@ import logging
 import config_loader
 from config_loader import SETTINGS_DATA, MISC_DATA
 from logging_setup import UNAUTHORIZED
+from permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
@@ -35,6 +36,7 @@ class user_cmds(commands.Cog):
     # --- COMMAND: /info ---
 
     @app_commands.command(name="info", description="Get information on a server member.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def info(self, interaction: discord.Interaction, user: discord.Member):
         
@@ -88,6 +90,7 @@ class user_cmds(commands.Cog):
     # --- COMMAND: /about ---
 
     @app_commands.command(name="about", description="Get information about EnduraBot.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def about(self, interaction: discord.Interaction):
         
@@ -110,20 +113,14 @@ class user_cmds(commands.Cog):
     # --- COMMAND: /alert ---
 
     @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     
     async def alert(self, interaction: discord.Interaction, desc: str):
 
-        guild_sailor_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sailor_role_id"))
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
         sysop_role = interaction.guild.get_role(self.settings_data.get("sysop_role_id"))
 
-        # Only allow sailors to use this command.
-        if not guild_sailor_role in interaction.user.roles:
-            await interaction.response.send_message(content="Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted submit a systems operator alert with the context: [{desc}].")
-            return
-        
         await interaction.response.send_message(content="Your report has been submitted.", ephemeral=True)
         await guild_alert_channel.send(
             content=f"# :rotating_light: INCIDENT ALERT :rotating_light:\n\n **Attention**: {sysop_role.mention}\n\n **Reporting User**: {interaction.user.mention} (from <#{interaction.channel.id}>) \n\n **Details**: \"{desc}\" \n\n Systems operator investigation requested! Please post in this channel and notify {interaction.user.mention} when investigation begins.", 
@@ -135,23 +132,13 @@ class user_cmds(commands.Cog):
     # --- COMMAND: /estop ---
 
     @app_commands.command(name="estop", description="Perform an emergency shutdown of EnduraBot.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
 
     async def estop(self, interaction: discord.Interaction):
 
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
         sysop_role_id = interaction.guild.get_role(self.settings_data.get("sysop_role_id"))
-
-        eligible_roles = [
-            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id")),
-            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("mod_role_id")),
-            discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
-        ]
-
-        if not set(eligible_roles).intersection(interaction.user.roles):
-            await interaction.response.send_message("Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to stop EnduraBot.")
-            return
         
         await interaction.response.send_message(content=f"Emergency stop has been activated. Report sent to <#{guild_alert_channel.id}>.", ephemeral=True)
         await guild_alert_channel.send(
@@ -165,6 +152,7 @@ class user_cmds(commands.Cog):
 # --- COMMAND: /links ---
 
     @app_commands.command(name="links", description="Quick access to EDC relevant links.")
+    @app_commands.check(check_permissions)    
     @app_commands.guilds(GUILD_ID)
     async def links(self, interaction: discord.Interaction):
 
@@ -190,6 +178,7 @@ class user_cmds(commands.Cog):
 # --- COMMAND: /ips ---
 
     @app_commands.command(name="ips", description="Quick access to EDC relevant IPs and ports.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def ips(self, interaction: discord.Interaction):
 
@@ -217,21 +206,14 @@ class user_cmds(commands.Cog):
 # --- COMMAND: /reboot ---
 
     @app_commands.command(name="reboot", description="Reboot EnduraBot.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def rconfig(self, interaction: discord.Interaction):
 
-        guild_sysop_role =  discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id"))
-
-        if not guild_sysop_role in interaction.user.roles:
-            await interaction.response.send_message("Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to reboot me. Rude.")
-            return
-
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) rebooted me.")
+        logger.critical(f"{interaction.user.name} ({interaction.user.id}) rebooted me.")
         await interaction.response.send_message("Rebooting...", ephemeral=True)
         await self.bot.close()
         await os.execv(sys.executable, ['python'] + ['main.py'])
-
         
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
