@@ -56,13 +56,26 @@ class user_cmds(commands.Cog):
         else:
             is_staff = ":x:"
 
+        if user.bot:
+            bot_emoji = ":white_check_mark:"
+        else:
+            bot_emoji = ":x:"
+
+        if user.premium_since == None:
+            premium_emoji = ":x:"
+        else:
+            premium_emoji = ":white_check_mark:"
+
         embed = discord.Embed(title=f"Information on {user.name}.", color=discord.Color.green())
         embed.set_thumbnail(url=user.display_avatar.url)
         embed.add_field(name="Identity", value=f"{user.mention} ({user.id})", inline=False)
+        embed.add_field(name="Global Name", value=user.global_name, inline=False)
         embed.add_field(name="Account Created", value=f"<t:{create_epoch}:f> (<t:{create_epoch}:R>)", inline=False)
         embed.add_field(name="Joined", value=f"<t:{join_epoch}:f> (<t:{join_epoch}:R>)", inline=False)
         embed.add_field(name="Backend Operator?", value=is_sysop)
         embed.add_field(name="Server Staff?", value=is_staff)
+        embed.add_field(name="Bot?", value=bot_emoji)
+        embed.add_field(name="Has Nitro?", value=premium_emoji)
         
         if len(user.roles) == 1: #We do -1 to exclude @@everyone.
             embed.add_field(name="Roles", value="None", inline=False)
