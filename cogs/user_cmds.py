@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord import app_commands, AllowedMentions
-import json
+import sys
 import logging
 import config_loader
 from config_loader import SETTINGS_DATA, MISC_DATA
@@ -214,9 +214,9 @@ class user_cmds(commands.Cog):
 
         return
 
-# --- COMMAND: /rconfig ---
+# --- COMMAND: /reboot ---
 
-    @app_commands.command(name="rconfig", description="Dynamically reload EnduraBot's configuration.")
+    @app_commands.command(name="reboot", description="Reboot EnduraBot.")
     @app_commands.guilds(GUILD_ID)
     async def rconfig(self, interaction: discord.Interaction):
 
@@ -224,17 +224,13 @@ class user_cmds(commands.Cog):
 
         if not guild_sysop_role in interaction.user.roles:
             await interaction.response.send_message("Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to reload configuration.")
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to reboot me. Rude.")
             return
 
-        if config_loader.load_configs() and config_loader.load_misc():
-            self.settings_data_g = config_loader.SETTINGS_DATA
-            self.misc_data_g = config_loader.MISC_DATA
-            await interaction.response.send_message(":white_check_mark: Configuration successfully reloaded.", ephemeral=True)
-            logger.info(f"{interaction.user.name} ({interaction.user.id}) reloaded all configuration.")
-        else:
-            await interaction.response.send_message(":x: Something went wrong. Review bot logs.", ephemeral=True)
-            logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to reload configuration and got an error.")
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) rebooted me.")
+        await interaction.response.send_message("Rebooting...", ephemeral=True)
+        await self.bot.close()
+        await os.execv(sys.executable, ['python'] + ['main.py'])
 
         
 async def setup(bot):
