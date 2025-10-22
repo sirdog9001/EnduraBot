@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import AllowedMentions
 import logging
+import random
 from config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('endurabot.' + __name__)
@@ -18,6 +19,8 @@ class bot_react(commands.Cog):
                 roles=True      
             )
 
+    # Check if a message triggers advising the user to make an alert instead.
+    
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
     
@@ -45,6 +48,25 @@ class bot_react(commands.Cog):
             await message.channel.send(embed=embed)
         else:
             return
+        
+    # Check if user should be insulted ;)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+
+        chance = SETTINGS_DATA["bot_insult_chance"]
+
+        if self.bot.user.mentioned_in(message):
+
+            value = random.random()
+
+            if value <= chance:
+                random_insult = random.choice(MISC_DATA["bot_insults"])
+                await message.channel.send(f"{message.author.mention}, {random_insult}", allowed_mentions=self.default_allowed_mentions)
+            else:
+                return
+            
+            
 
 async def setup(bot):
     await bot.add_cog(bot_react(bot))

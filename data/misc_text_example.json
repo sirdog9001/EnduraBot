@@ -8,7 +8,7 @@
     "daily_bible_openers": [
         "Congregation, quiet your spirits, for the very voice of the Lord God Almighty echoes now:",
         "I hear it! A direct word from heaven, cutting through the noise, proclaiming this truth:",
-        "Every ear, every heart! For the Spirit of the Living God is about to thunder His decree:"     
+        "Every ear, every heart! For the Spirit of the Living God is about to thunder His decree:"
     ],
     "server_identifiers": [
         "arma",
@@ -20,16 +20,21 @@
         "borked",
         "issue"
     ],
-      "ooc_dating": [
+    "bot_insults": [
+        "Is your brain made of cotton candy? Because it seems to melt at the slightest bit of heat.",
+        "You're about as sharp as a bowling ball.",
+        "If I wanted to hear from an expert on yourself, I'd have asked for your opinion."
+    ],
+    "ooc_dating": [
         "Oh, darling! You know I fell for you when you said:",
         "I'll never forget our first date. My heart skipped a beat when you leaned in and whispered:"
-  ],
-      "ooc_court": [
+    ],
+    "ooc_court": [
         "Let the record reflect that the defendant said:",
         "Your Honor, the prosecution's entire case rests on the defendant's baffling admission, and I quote:"
-  ],
-      "ooc_hr": [
+    ],
+    "ooc_hr": [
         "Thank you for coming in. I know this was sudden, but we've heard rumors that you said something... odd. Quote:",
         "So, regarding your contribution to the Q&A at the all-hands meeting, specifically when you took the mic and announced:"
-  ]
+    ]
 }
