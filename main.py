@@ -27,6 +27,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 bot.initial_start_time = None
 
+# Dictionary to store invites
+invites = {}
+
 @bot.event
 async def on_guild_join(guild):
     if guild.id != GUILD_ID:
@@ -57,8 +60,16 @@ async def on_ready():
 
     logger.info("Hello, world! I am awake and ready to work!")
     
+    # Get time that bot loaded up
     if bot.initial_start_time == None:
         bot.initial_start_time = round(discord.utils.utcnow().timestamp())
+
+    # Get invites at time of bot start
+    for guild in bot.guilds:
+        invites = await guild.invites()
+
+    bot.invites = invites
+
 
 bot.run(BOT_TOKEN)
 
