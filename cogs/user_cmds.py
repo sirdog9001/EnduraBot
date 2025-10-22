@@ -214,6 +214,17 @@ class user_cmds(commands.Cog):
         await interaction.response.send_message("Rebooting...", ephemeral=True)
         await self.bot.close()
         await os.execv(sys.executable, ['python'] + ['main.py'])
+
+# --- COMMAND: /echo ---
+
+    @app_commands.command(name="echo", description="Make EnduraBot speak.")
+    @app_commands.check(check_permissions)
+    @app_commands.guilds(GUILD_ID)
+    async def echo(self, interaction: discord.Interaction, msg: str):
+
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) sent a message as EnduraBot with content [{msg}].")
+        await interaction.response.send_message("Message sent.", ephemeral=True)
+        await interaction.channel.send(msg)
         
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
