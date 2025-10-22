@@ -23,9 +23,9 @@ async def check_permissions(interaction: discord.Interaction):
 
     if set(eligible_roles_objects).intersection(user_roles):
         return True
-    elif not set(eligible_roles_objects).intersection(user_roles) and interaction.user == interaction.guild.owner:
-        logger.debug(f"Owner {interaction.user.name} ({interaction.user.id}) bypassed traditional restrictions for command /{interaction.command.name}.")
-        return True
+    #elif not set(eligible_roles_objects).intersection(user_roles) and interaction.user == interaction.guild.owner:
+        #logger.debug(f"Owner {interaction.user.name} ({interaction.user.id}) bypassed traditional restrictions for command /{interaction.command.name}.")
+       # return True
     else:
         return False
         
