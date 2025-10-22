@@ -13,6 +13,7 @@ import re
 import logging
 from config_loader import SETTINGS_DATA, MISC_DATA
 from logging_setup import COOLDOWN, UNAUTHORIZED
+from permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
@@ -52,6 +53,7 @@ class rquote(commands.Cog):
 
 
     @app_commands.command(name="rquote", description="Take an out of context quote and give it the wrong context.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     @app_commands.checks.dynamic_cooldown(custom_cooldown)
 
@@ -130,18 +132,13 @@ class rquote(commands.Cog):
 
 
     @app_commands.command(name="rquote-debug", description="Debugging tool.")
+    @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def rquote_debug(self, interaction: discord.Interaction, message_id: str):
 
         # -- Phase 1: Check if channel and message exist --
         channel_id = interaction.channel.id
         channel = self.bot.get_channel(int(channel_id))
-        guild_sysop_role =  discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id"))
-
-        if not guild_sysop_role in interaction.user.roles:
-            await interaction.response.send_message("Access denied.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to debug a message with /rquote-debug.")
-            return
 
         try:
             await channel.fetch_message(int(message_id))
