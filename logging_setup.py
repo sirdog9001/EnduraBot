@@ -12,6 +12,8 @@ logging.addLevelName(COOLDOWN, 'COOLDOWN')
 BOOT = 26
 logging.addLevelName(BOOT, 'BOOT')
 
+INVITES = 39
+logging.addLevelName(INVITES, 'INVITES')
 
 # Custom filter so that debug messages go to their own file.
 class DebugOnlyFilter(logging.Filter):
