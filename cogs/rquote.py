@@ -125,5 +125,110 @@ class rquote(commands.Cog):
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
                 logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the cooldown with {seconds} second(s) remaining.")
 
+
+    # --- COMMAND: /rquote-debug ---
+
+
+    @app_commands.command(name="rquote-debug", description="Debugging tool.")
+    @app_commands.guilds(GUILD_ID)
+    async def rquote_debug(self, interaction: discord.Interaction, message_id: str):
+
+        # -- Phase 1: Check if channel and message exist --
+        channel_id = interaction.channel.id
+        channel = self.bot.get_channel(int(channel_id))
+        guild_sysop_role =  discord.utils.get(interaction.guild.roles, id=self.settings_data.get("sysop_role_id"))
+
+        if not guild_sysop_role in interaction.user.roles:
+            await interaction.response.send_message("Access denied.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to debug a message with /rquote-debug.")
+            return
+
+        try:
+            await channel.fetch_message(int(message_id))
+        except discord.NotFound:
+            logger.debug(f"{interaction.user.name} ({interaction.user.id}) failed to find message ID ({message_id}) in #{channel.name}.")
+            await interaction.response.send_message(f"A message with ID `{message_id}` not found. Note that this command should be run in the channel containing the message.", ephemeral=True)
+            return
+        
+        # -- Phase 2: Get message in formatted form just like /rquote --
+        
+        selected_msg = await channel.fetch_message(int(message_id))
+        all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
+        extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
+        formatted_quote = f'"{extracted_quote}"'
+
+        if selected_msg.attachments:
+            has_attachment = True
+            has_attachment_emoji = ":white_check_mark:"
+        else:
+            has_attachment = False
+            has_attachment_emoji = ":x:"
+
+        # -- Phase 3: If the message would never be selected, indicate as such --
+
+        if not all_matches:
+            embed1 = discord.Embed(
+                title=":x: Message is not qualified",
+                description=f"Message does not fit the pattern for quote selection and would not be picked.",
+                color=8650752
+            )
+            embed2 = discord.Embed(
+                title=":information_source: Message Information",
+                description=f"Message link: {selected_msg.jump_url}",
+                color=discord.Color.purple()
+            )
+            embed2.add_field(name="Author", value=f"<@{selected_msg.author.id}>")
+            embed2.add_field(name="Dated", value=f"<t:{round(selected_msg.created_at.timestamp())}:f>")
+            embed2.add_field(name="Message ID", value=f"`{selected_msg.id}`")
+            embed2.add_field(name="Channel ID", value=f"`{channel_id}`")
+            embed2.add_field(name="Qualified", value=":x:")
+            embed2.add_field(name="Full Content", value=selected_msg.content, inline=False)
+            embed2.add_field(name="Content with Filter", value=formatted_quote, inline=False)
+            embed2.add_field(name="Embed", value=has_attachment_emoji)
+
+            if has_attachment == True:
+                embed2.set_image(url=selected_msg.attachments[0].url)
+
+            logger.debug(f"{interaction.user.name} ({interaction.user.id}) debugged a message. Verdict: [❌]. Dated: [{selected_msg.created_at.strftime("%B %d, %Y")}]. Message ID: [{selected_msg.id}]. Channel ID: [{channel_id}]. Author: [{selected_msg.author}]. Raw Content: [{selected_msg.content}]. Filtered Content: [{formatted_quote}]. Attachment: [{has_attachment}].")
+            await interaction.response.send_message(embeds=[embed1, embed2], ephemeral=True)
+
+        # -- Phase 4: If message WOULD be selected, execute /rquote as normal but with the debugging embed too
+
+        else:
+            
+            selected_theme_data = self.themes[random.choice(list(self.themes.keys()))]
+            opener_key_from_json = selected_theme_data["opener_key"]
+            random_opener = random.choice(self.misc_data[opener_key_from_json])
+
+            embed1 = discord.Embed(
+                title=selected_theme_data["title"], 
+                description=f"{random_opener}\n\n>>> {formatted_quote}",
+                color=selected_theme_data["color"]
+                )
+            
+            embed1.set_footer(text="This scenario is not representative of the Endurance Coalition's values.")
+
+            embed2 = discord.Embed(
+                title=":information_source: Message Information",
+                description=f"Message link: {selected_msg.jump_url}",
+                color=discord.Color.purple()
+            )
+            embed2.add_field(name="Author", value=f"<@{selected_msg.author.id}>")
+            embed2.add_field(name="Dated", value=f"<t:{round(selected_msg.created_at.timestamp())}:f>")
+            embed2.add_field(name="Message ID", value=f"`{selected_msg.id}`")
+            embed2.add_field(name="Channel ID", value=f"`{channel_id}`")
+            embed2.add_field(name="Theme", value=selected_theme_data["opener_key"])
+            embed2.add_field(name="Qualified", value=":white_check_mark:")
+            embed2.add_field(name="Full Content", value=selected_msg.content, inline=False)
+            embed2.add_field(name="Content with Filter", value=formatted_quote, inline=False)
+            embed2.add_field(name="Opener", value=random_opener, inline=False)
+            embed2.add_field(name="Embed", value=has_attachment_emoji)
+
+            if has_attachment == True:
+                embed1.set_image(url=selected_msg.attachments[0].url)
+
+            logger.debug(f"{interaction.user.name} ({interaction.user.id}) debugged a message. Verdict: [✅]. Dated: [{selected_msg.created_at.strftime("%B %d, %Y")}]. Message ID: [{selected_msg.id}]. Channel ID: [{channel_id}]. Author: [{selected_msg.author}]. Theme: [{selected_theme_data["opener_key"]}]. Opener: [{random_opener}]. Raw Content: [{selected_msg.content}]. Filtered Content: [{formatted_quote}]. Attachment: [{has_attachment}].")
+            await interaction.response.send_message(embeds=[embed1, embed2], ephemeral=True)
+
 async def setup(bot):
     await bot.add_cog(rquote(bot))
