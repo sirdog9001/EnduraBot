@@ -1,0 +1,65 @@
+site_name: EnduraBot Documentation
+site_url: http://127.0.0.1:8000/
+use_directory_urls: true
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: indigo
+  icon:
+    repo: fontawesome/brands/github
+  logo: /assets/EnduraBot_Logo.png
+  favicon: /assets/EnduraBot_Logo.ico
+  features:
+    - header.autohide
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.footer
+    - toc.integrate
+    - toc.follow
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+    - content.tooltips
+    - content.code.copy
+
+extra_css:
+  - assets/custom.css
+
+markdown_extensions:
+  - admonition
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - tables
+  - toc:
+      permalink: true
+  - abbr
+  - footnotes
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.snippets:
+      auto_append:
+        - includes/glossary.md
+
+nav:
+  - Welcome: index.md
+  - Features:
+      - Commands: commands.md
+      - Miscellanious: misc.md
+  - Developers:
+      - Getting Started: getting-started.md
+
+copyright: Text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 License</a> unless otherwise noted.
+
+extra:
+  generator: true
