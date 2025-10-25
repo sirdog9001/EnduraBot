@@ -1,5 +1,5 @@
 import logging
-from logging_setup import INVITES
+from utils.logging_setup import INVITES
 import datetime
 from discord.ext import commands, tasks
 

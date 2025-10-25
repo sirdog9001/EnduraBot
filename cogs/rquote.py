@@ -11,9 +11,9 @@ from datetime import datetime, timezone, timedelta
 import random
 import re
 import logging
-from config_loader import SETTINGS_DATA, MISC_DATA
-from logging_setup import COOLDOWN, UNAUTHORIZED
-from permissions_checker import check_permissions
+from utils.config_loader import SETTINGS_DATA, MISC_DATA
+from utils.logging_setup import COOLDOWN, UNAUTHORIZED
+from utils.permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
