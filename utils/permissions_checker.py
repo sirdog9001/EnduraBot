@@ -1,6 +1,6 @@
 import discord
 import logging
-from config_loader import PERMS_DATA
+from utils.config_loader import PERMS_DATA
 
 logger = logging.getLogger('endurabot.' + __name__)
 

@@ -9,9 +9,9 @@ from discord import app_commands
 from discord.ext import commands
 
 # Setup logging
-import logging_setup
-from logging_setup import UNAUTHORIZED
-from config_loader import PERMS_DATA
+import utils.logging_setup as logging_setup
+from utils.logging_setup import UNAUTHORIZED
+from utils.config_loader import PERMS_DATA
 logger = logging_setup.configure_logging()
 
 # Environment variable stuff
@@ -45,14 +45,30 @@ async def on_guild_join(guild):
 @bot.event
 async def on_ready():
 
-    # Load cogs.
+    # Load cogs, listeners, and tasks.
     try:
         for filename in os.listdir("cogs"):
             if filename.endswith(".py"):
                 await bot.load_extension(f"cogs.{filename[:-3]}")
                 logger.info(f"Loaded cogs.{filename[:-3]}")
     except Exception as e:
-        logger.critical("FATAL ERROR: ", e)    
+        logger.critical("FATAL ERROR: ", e)
+
+    try:
+        for filename in os.listdir("listeners"):
+            if filename.endswith(".py"):
+                await bot.load_extension(f"listeners.{filename[:-3]}")
+                logger.info(f"Loaded listeners.{filename[:-3]}")
+    except Exception as e:
+        logger.critical("FATAL ERROR: ", e)
+
+    try:
+        for filename in os.listdir("tasks"):
+            if filename.endswith(".py"):
+                await bot.load_extension(f"tasks.{filename[:-3]}")
+                logger.info(f"Loaded tasks.{filename[:-3]}")
+    except Exception as e:
+        logger.critical("FATAL ERROR: ", e)  
     
     # Sync slash commands to relevant guild.
     try:
