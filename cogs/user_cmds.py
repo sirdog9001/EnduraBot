@@ -208,7 +208,7 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="reboot", description="Reboot EnduraBot.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-    async def rconfig(self, interaction: discord.Interaction):
+    async def reboot(self, interaction: discord.Interaction):
 
         logger.critical(f"{interaction.user.name} ({interaction.user.id}) rebooted me.")
         await interaction.response.send_message("Rebooting...", ephemeral=True)

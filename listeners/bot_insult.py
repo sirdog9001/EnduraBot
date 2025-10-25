@@ -30,8 +30,10 @@ class bot_insult(commands.Cog):
 
             if value <= chance:
                 random_insult = random.choice(MISC_DATA["bot_insults"])
+                logger.debug(f"{message.author.name} ({message.author.id}) pinged EnduraBot and triggered an insult at value [{value}]. Insult was [{random_insult}].")
                 await message.channel.send(f"{message.author.mention}, {random_insult}", allowed_mentions=self.default_allowed_mentions)
             else:
+                logger.debug(f"{message.author.name} ({message.author.id}) pinged EnduraBot and did NOT trigger an insult at value [{value}].")
                 return 
 
 async def setup(bot):
