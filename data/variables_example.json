@@ -7,9 +7,7 @@
     "sysop_role_id": 3456789012345678901,
     "mod_role_id": 4567890123456789012,
     "admin_role_id": 5678901234567890123,
-    "roach_cock_role_id": 6789012345678901234,
     "L_role_id": 7890123456789012345,
-    "sailor_role_id": 8901234567890123456,
     "cooldown_exempt_roles": [
         9012345678901234567,
         1023456789012345678
@@ -22,6 +20,7 @@
         "https://github.com/dummyuser/dummyrepo": "DummyBot GitHub Source"
     },
     "edc_ip": "192.168.1.100",
+    "edc_url": "google.com",
     "rquote_cooldown_in_minutes": 1800,
     "bot_insult_chance": 1,
     "bibleq_hour_of_day": 1,

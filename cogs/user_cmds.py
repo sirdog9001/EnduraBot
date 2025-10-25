@@ -184,10 +184,11 @@ class user_cmds(commands.Cog):
 
         ports_list = self.settings_data.get("edc_ports", {})
         edc_ip = self.settings_data.get("edc_ip")
+        edc_url = self.settings_data.get("edc_url")
 
         embed = discord.Embed(
             title="Endurance Coalition IP Addresses",
-            description=f"Most games should accept `edcgaming.org` as our IP address. Just append the port to the end like usual.\n\n If for some reason that does not work, our *raw* IP is `{edc_ip}`.",
+            description=f"Most games should accept `{edc_url}` as our IP address. Just append the port to the end like usual.\n\n If for some reason that does not work, our *raw* IP is `{edc_ip}`.",
             color=discord.Color.blue()
         )
 
