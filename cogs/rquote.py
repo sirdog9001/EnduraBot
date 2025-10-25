@@ -85,11 +85,7 @@ class rquote(commands.Cog):
             )
         ]
 
-        # If a situation were to ever somehow occur where msg_table comes empty, use a pre-selected message to keep things moving.
-        if not msg_table:
-            selected_msg = await ooc_channel.fetch_message(1426039544490229811)
-        else:       
-            selected_msg = random.choice(msg_table)
+        selected_msg = random.choice(msg_table)
 
         all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
         extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
