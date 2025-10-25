@@ -4,7 +4,7 @@ from discord.ext import tasks, commands
 import logging
 import random
 import re
-from config_loader import SETTINGS_DATA, MISC_DATA
+from utils.config_loader import SETTINGS_DATA, MISC_DATA
 
 logger = logging.getLogger('endurabot.' + __name__)
 

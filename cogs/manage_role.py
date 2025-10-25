@@ -8,9 +8,9 @@ from discord.ext import commands
 from discord import app_commands
 from discord import app_commands, AllowedMentions
 import logging
-from config_loader import SETTINGS_DATA
-from logging_setup import UNAUTHORIZED
-from permissions_checker import check_permissions
+from utils.config_loader import SETTINGS_DATA
+from utils.logging_setup import UNAUTHORIZED
+from utils.permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
