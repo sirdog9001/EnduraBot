@@ -66,6 +66,3 @@ class DBRGITGames():
 
         self.cursor.execute("SELECT rgit_games_itad_id, rgit_games_title FROM rgit_games")
         return dict(self.cursor.fetchall())
-
-#hell = DBRGITGames()
-#print(hell.get_ids_and_names())

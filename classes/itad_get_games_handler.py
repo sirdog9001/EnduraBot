@@ -37,9 +37,16 @@ class ItadGameSearchHandler():
             raise ValueError("Something went wrong.")
         
         try:
-            self.boxart = full_data["assets"]["boxart"] 
+            self.boxart = full_data["assets"]["boxart"]
         except KeyError:
             self.boxart = None
+            logger.debug(f"Boxart not found for {full_data["title"]} ({full_data["id"]}).") 
+
+        if full_data["releaseDate"] == None:
+            self.release_date = "Unreleased"
+            logger.debug(f"{full_data["title"]}({full_data["id"]}) [releaseDate] set to [Unreleased].")
+        else:
+            self.release_date = full_data["releaseDate"]
 
         publisher_list = []
         tags_list = []
@@ -52,7 +59,6 @@ class ItadGameSearchHandler():
 
         self.title = full_data["title"]
         self.id = full_data["id"]
-        self.release_date = full_data["releaseDate"]
         self.publishers = publisher_list
         self.tags = tags_list
 
@@ -65,6 +71,7 @@ class ItadGameSearchHandler():
 
         try:
             data["status_code"]
+            logger.debug(f"A tested API connection failed.")
             return False
         except KeyError:
             return True
