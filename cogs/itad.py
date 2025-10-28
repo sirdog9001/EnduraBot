@@ -11,6 +11,7 @@ import datetime
 import utils.config_loader as config_loader
 from utils.config_loader import SETTINGS_DATA
 from utils.permissions_checker import check_permissions
+from utils.logging_setup import COOLDOWN
 from classes.db_rgit_games_handler import DBRGITGames
 from classes.itad_get_games_handler import ItadGameSearchHandler
 from classes.itad_get_deals_handler import ItadGameDealsHandler
@@ -181,6 +182,7 @@ class itad(commands.Cog):
     @app_commands.command(name="rgit-deals", description="Get list of deals for games in the RGIT table.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.checks.cooldown(1, SETTINGS_DATA["rgit_deals_cooldown_in_seconds"], key=commands.BucketType.default)
     async def rgitdeals(self, interaction: discord.Interaction):
 
         deals = ItadGameDealsHandler(db.get_ids()) # Get deal data from ITAD API by running a method from DBRGITGames that gives a Python list of all game IDs in the DB.
@@ -210,6 +212,17 @@ class itad(commands.Cog):
         embed.set_footer(text="Powered by the IsThereAnyDeal API.")
         logger.info(f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games.")
         await interaction.response.send_message(embed=embed)
+
+    @rgitdeals.error
+    async def rgitdeals_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            minutes, seconds = divmod(int(error.retry_after), 60)
+            if minutes > 0:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {minutes} minute(s) and {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the RGIT deals cooldown with {minutes} minute(s) and {seconds} second(s) remaining.")
+            else:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the RGIT deals cooldown with {seconds} second(s) remaining.")
         
 async def setup(bot):
     await bot.add_cog(itad(bot))

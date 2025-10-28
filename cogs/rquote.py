@@ -118,10 +118,10 @@ class rquote(commands.Cog):
             minutes, seconds = divmod(int(error.retry_after), 60)
             if minutes > 0:
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {minutes} minute(s) and {seconds} second(s).", ephemeral=True)
-                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the cooldown with {minutes} minute(s) and {seconds} second(s) remaining.")
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the RQUOTE cooldown with {minutes} minute(s) and {seconds} second(s) remaining.")
             else:
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
-                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the cooldown with {seconds} second(s) remaining.")
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the RQUOTE cooldown with {seconds} second(s) remaining.")
 
 
     # --- COMMAND: /rquote-debug ---
