@@ -5,7 +5,6 @@ load_dotenv()
 
 import discord
 from discord.ext import commands
-from discord import app_commands
 from discord import app_commands, AllowedMentions
 import logging
 import datetime
@@ -17,13 +16,14 @@ from classes.itad_get_games_handler import ItadGameSearchHandler
 from classes.itad_get_deals_handler import ItadGameDealsHandler
 
 logger = logging.getLogger('endurabot.' + __name__)
-db = DBRGITGames()
+db = DBRGITGames() # Create connection to RGITGames DB.
 
 GUILD_ID = int(os.getenv('guild'))
 API_TOKEN = os.getenv('itad-token')
 
-
 class AddView(discord.ui.View):
+
+    # This class exists to 1) create the buttons at all and 2) assign functions that each button executes on press.
 
     def __init__(self, game_title, game_id, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -58,6 +58,8 @@ class AddView(discord.ui.View):
 
 async def addGamePrompt(interaction: discord.Interaction, title):
     
+    # If the user indicates they want to add a game, run this function.
+
     try:
         
         itad_search = ItadGameSearchHandler(title)
@@ -70,7 +72,6 @@ async def addGamePrompt(interaction: discord.Interaction, title):
         embed.add_field(name="Released", value=datetime.datetime.strptime(itad_search.get_release_date(), '%Y-%m-%d').strftime('%B %d, %Y'), inline=False)
         embed.add_field(name="Publishers", value=', '.join(itad_search.get_publishers()), inline=False)
         embed.add_field(name="Tags", value=', '.join(itad_search.get_tags()), inline=False)
-        #embed.set_footer(text="Powered by the IsThereAnyDeal API")
 
         view = AddView(game_title=itad_search.get_title(), game_id=itad_search.get_id())
         await interaction.followup.send(content="Is this the game you wish to add?", embed=embed, view=view, ephemeral=True)
@@ -85,6 +86,8 @@ async def addGamePrompt(interaction: discord.Interaction, title):
         return
 
 async def removeGame(interaction: discord.Interaction, title):
+
+     # If the user indicates they want to remove a game, run this function.
             
     rgit_game = ItadGameSearchHandler(title)
     rgit_games_db = DBRGITGames()
@@ -96,6 +99,9 @@ async def removeGame(interaction: discord.Interaction, title):
     
     rgit_games_db.remove_game(rgit_game.get_id())
     await interaction.followup.send("Game removed.", ephemeral=True)
+
+
+# Typical Discord cog class creation
 
 class itad(commands.Cog):
     def __init__(self, bot):
@@ -111,6 +117,7 @@ class itad(commands.Cog):
             )
 
  # --- /rgit-edit ---
+ # Add or remove games from the RGIT games table based on ITAD API data.
 
     @app_commands.command(name="rgit-edit", description="Add or remove a game from the RGIT database.")
     @app_commands.check(check_permissions)
@@ -131,40 +138,50 @@ class itad(commands.Cog):
            await removeGame(interaction, title)
            
  # --- /rgit-table ---
+ # Get a raw list of every game in the table.
 
     @app_commands.command(name="rgit-list", description="List all games in the RGIT table.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def rgitlist(self, interaction: discord.Interaction):
 
-        temporary_list = []
-        db = DBRGITGames()
+        temporary_list = [] # Initiate an empty list
 
-        for game in db.list_games():
+        for game in db.list_games(): # Running the list_games() method of the RGITGames class, append every game name in the RGIT games table to the initiated list.
             temporary_list.append(f"- {game}")
        
-        games = "\n".join(temporary_list)
+        games = "\n".join(temporary_list) #Join every item in the list together, initiating new lines per item.
+
         embed = discord.Embed(title="Games List", description=games, color=3800852)
         embed.set_footer(text="Powered by the IsThereAnyDeal API")
         await interaction.response.send_message(content="The following is a list of embeds on the RGIT table.", embed=embed, ephemeral=True)
 
 
 # --- /rgit-deals --
+# Get a list of what games in the RGIT database have deals.
+# This will only produce at max 25 (enforced by the ItadGameDealsHandler class) due to Discord embed field limits.
 
     @app_commands.command(name="rgit-deals", description="List all games in the RGIT table.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def rgitdeals(self, interaction: discord.Interaction):
 
-        db = DBRGITGames()
-        deals = ItadGameDealsHandler(db.get_ids())
-        name_to_id_dict = db.get_ids_and_names()
+        deals = ItadGameDealsHandler(db.get_ids()) # Get deal data from ITAD API by running a method from DBRGITGames that gives a Python list of all game IDs in the DB.
+        name_to_id_dict = db.get_ids_and_names() # Get JSON key/value pairs where the key is a game's ITAD UUID and the value is the game's name. 
 
         embed = discord.Embed(title="Available Deals", description="The following are all the deals currently available for the RGIT games.")
 
-        for deal in deals.get_deals():        
+        for deal in deals.get_deals():  
+
+            # Get a game name's for each iterated deal by mapping the ID given by the ITAD API 
+            # against the key/value pairs retrieved from the DB.
+            # VVVVVVVVVVVVVVVV
+            
             id = deal["id"]
-            game_name = name_to_id_dict[id]
+            game_name = name_to_id_dict[id] 
+
+            # ^^^^^^^^^^^^^^^
+
             deals_amount = "${:0.2f}".format(deal["deals"][0]["price"]["amount"])
             full_amount = "${:0.2f}".format(deal["deals"][0]["regular"]["amount"])
 
