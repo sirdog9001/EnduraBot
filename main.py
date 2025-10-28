@@ -12,6 +12,7 @@ from discord.ext import commands
 import utils.logging_setup as logging_setup
 from utils.logging_setup import UNAUTHORIZED
 from utils.config_loader import PERMS_DATA
+from classes.db_blacklist_handler import DBBlacklist
 logger = logging_setup.configure_logging()
 
 # Environment variable stuff
@@ -32,6 +33,9 @@ bot.initial_start_time = None
 
 # Dictionary to store invites
 invites = {}
+
+# BlacklistDB connection
+db = DBBlacklist()
 
 @bot.event
 async def on_guild_join(guild):
@@ -97,18 +101,33 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
     
     if isinstance(error, app_commands.CheckFailure):
 
-        logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to run /{interaction.command.name}.")
-        
-        eligible_role_ids = PERMS_DATA.get(interaction.command.name, [])
+            
+        if db.check_status(interaction.user.id):
 
-        embed = discord.Embed(
-            title=":octagonal_sign: Access denied.",
-            description=f"You do not possess access to run `/{interaction.command.name}`. Only members with the role(s) below may use this command.",
-            color=8650752
-        )
-        embed.add_field(name="Approved Role(s)", value=f"{' | '.join(f"<@&{role_id}>" for role_id in eligible_role_ids)}")
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-        return
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to run /{interaction.command.name} while blacklisted.")
+
+            embed = discord.Embed(
+                title=":no_entry: Access denied.",
+                description=f"You have been blacklisted from using EnduraBot.",
+                color=00000
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        else:
+
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to run /{interaction.command.name}.")
+            
+            eligible_role_ids = PERMS_DATA.get(interaction.command.name, [])
+
+            embed = discord.Embed(
+                title=":octagonal_sign: Access denied.",
+                description=f"You do not possess access to run `/{interaction.command.name}`. Only members with the role(s) below may use this command.",
+                color=8650752
+            )
+            embed.add_field(name="Approved Role(s)", value=f"{' | '.join(f"<@&{role_id}>" for role_id in eligible_role_ids)}")
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
 bot.run(BOT_TOKEN)
 
