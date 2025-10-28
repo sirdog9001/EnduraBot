@@ -10,6 +10,10 @@ COPY main.py .
 COPY .env .
 COPY logging_setup.py .
 COPY config_loader.py .
+COPY classes/ classes/
 COPY cogs/ cogs/
+COPY listeners/ listeners/
+COPY tasks/ tasks/
+COPY utils/ utils/
 
 CMD ["python", "main.py"]

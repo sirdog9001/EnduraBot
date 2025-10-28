@@ -159,7 +159,6 @@ class itad(commands.Cog):
         db = DBRGITGames()
         deals = ItadGameDealsHandler(db.get_ids())
         name_to_id_dict = db.get_ids_and_names()
-        price_format = 12345.6789
 
         embed = discord.Embed(title="Available Deals", description="The following are all the deals currently available for the RGIT games.")
 
@@ -168,8 +167,6 @@ class itad(commands.Cog):
             game_name = name_to_id_dict[id]
             deals_amount = "${:0.2f}".format(deal["deals"][0]["price"]["amount"])
             full_amount = "${:0.2f}".format(deal["deals"][0]["regular"]["amount"])
-            
-            #{deal["deals"][0]["price"]["amount"].format(price_format)}
 
             embed.add_field(name=f"{game_name} ({deal["deals"][0]["cut"]}% Off)", value=f"{deals_amount} ({full_amount}) at [{deal["deals"][0]["shop"]["name"]}]({deal["deals"][0]["url"]})")
 
