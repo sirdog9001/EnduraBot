@@ -1,18 +1,23 @@
 import discord
 import logging
 from utils.config_loader import PERMS_DATA
+from classes.db_blacklist_handler import DBBlacklist
 
 logger = logging.getLogger('endurabot.' + __name__)
+db = DBBlacklist()
 
 async def check_permissions(interaction: discord.Interaction):
 
     cmd = interaction.command.name
     eligible_role_ids = PERMS_DATA.get(cmd, [])
 
+    if db.check_status(interaction.user.id) == True:
+        return False
+
     # If no IDs exist, then the command doesn't have a restriction.
     if not eligible_role_ids:
         return True
-    
+
     eligible_roles_objects = []
     for role_id in eligible_role_ids:
         role = interaction.guild.get_role(role_id)
