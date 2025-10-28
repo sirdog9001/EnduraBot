@@ -3,6 +3,9 @@ import sys
 import datetime
 
 # Custom logging levels
+BLACKLIST = 36
+logging.addLevelName(BLACKLIST, 'BLACKLIST')
+
 UNAUTHORIZED = 35
 logging.addLevelName(UNAUTHORIZED, 'UNAUTHORIZED')
 

@@ -12,7 +12,7 @@ class DBRGITGames():
     def __init__(self):
         self.connection = sqlite3.connect('endurabot.db')
         self.cursor = self.connection.cursor()
-        check_if_table_exists = """CREATE TABLE IF NOT EXISTS rgit_games(rgit_games_id INTEGER PRIMARY KEY, rgit_games_itad_id TEXT,
+        check_if_table_exists = """CREATE TABLE IF NOT EXISTS rgit_games(rgit_games_id INTEGER PRIMARY KEY AUTOINCREMENT, rgit_games_itad_id TEXT,
         rgit_games_title TEXT, rgit_games_added_by TEXT, rgit_games_timestamp NUMERIC)"""
         self.cursor.execute(check_if_table_exists)
         self.connection.commit()
