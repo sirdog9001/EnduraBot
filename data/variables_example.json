@@ -22,6 +22,7 @@
     "edc_ip": "192.168.1.100",
     "edc_url": "google.com",
     "rquote_cooldown_in_minutes": 1800,
+    "rgit_deals_cooldown_in_seconds": 600,
     "bot_insult_chance": 1,
     "bibleq_hour_of_day": 1,
     "bibleq_min_of_day": 0,
