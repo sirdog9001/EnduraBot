@@ -45,7 +45,7 @@ class blacklist(commands.Cog):
     app_commands.Choice(name="Remove User",value="remove")
 ])
     @app_commands.guilds(GUILD_ID)
-    async def info(self, interaction: discord.Interaction, options: app_commands.Choice[str], user: discord.Member):
+    async def blacklist(self, interaction: discord.Interaction, options: app_commands.Choice[str], user: discord.Member):
 
         
         guild_admin_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("admin_role_id"))
