@@ -1,6 +1,7 @@
 __pycache__/
 *.env
 *.log
+*.db
 data/variables.json
 data/misc_text.json
 data/permissions.json
