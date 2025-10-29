@@ -181,19 +181,34 @@ class itad(commands.Cog):
 
     @app_commands.command(name="rgit-deals", description="Get list of deals for games in the RGIT table.")
     @app_commands.check(check_permissions)
+    @app_commands.choices(options = [
+        app_commands.Choice(name="Sort by Percentage Off",value="cut"),
+        app_commands.Choice(name="Sort by Straight Price",value="price")
+])
     @app_commands.guilds(GUILD_ID)
+    
     @app_commands.checks.cooldown(1, SETTINGS_DATA["rgit_deals_cooldown_in_seconds"], key=commands.BucketType.default)
-    async def rgitdeals(self, interaction: discord.Interaction):
+    async def rgitdeals(self, interaction: discord.Interaction, options: app_commands.Choice[str],):
 
         deals = ItadGameDealsHandler(db.get_ids()) # Get deal data from ITAD API by running a method from DBRGITGames that gives a Python list of all game IDs in the DB.
         name_to_id_dict = db.get_ids_and_names() # Get JSON key/value pairs where the key is a game's ITAD UUID and the value is the game's name. 
 
-        embed = discord.Embed(title=":moneybag: Available Deals", 
-                              description="The following are deals, in order from largest cut to lowest cut, for the games in the RGIT table. Due to technical limitations only 25 deals are displayable.",
-                              color=3800852
-                              )
+        if options.value == "cut":
+            deals_sorted = deals.get_deals_by_cut()
+            title = "Available Deals — Sorted by Percentage Off"
+            log = f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games sorted by percentage off."
+        
+        if options.value == "price":
+            deals_sorted = deals.get_deals_by_price()
+            title = "Available Deals — Sorted by Price"
+            log = f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games sorted by price."
 
-        for deal in deals.get_deals():  
+        embed = discord.Embed(title=f":moneybag: {title}", 
+                        description="The following are the current deals for RGIT games. Due to technical limitations only 25 deals are displayable.",
+                        color=3800852
+                        )
+
+        for deal in deals_sorted:  
 
             # Get a game name's for each iterated deal by mapping the ID given by the ITAD API 
             # against the key/value pairs retrieved from the DB.
@@ -210,7 +225,7 @@ class itad(commands.Cog):
             embed.add_field(name=f"{game_name} ({deal["deals"][0]["cut"]}% Off)", value=f"{deals_amount} ({full_amount}) at [{deal["deals"][0]["shop"]["name"]}]({deal["deals"][0]["url"]})")
 
         embed.set_footer(text="Powered by the IsThereAnyDeal API.")
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games.")
+        logger.info(log)
         await interaction.response.send_message(embed=embed)
 
     @rgitdeals.error
