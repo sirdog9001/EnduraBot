@@ -25,9 +25,14 @@ class ItadGameDealsHandler():
         self.deals = deals
         self.list_of_ids = deals_list
 
-    def get_deals(self):
-
+    def get_deals_by_cut(self):
         deals_sorted = sorted(self.deals, key=lambda x: x['deals'][0]['cut'], reverse=True)
+        
+        deals_cut = list(islice(deals_sorted, 25))
+        return deals_cut
+    
+    def get_deals_by_price(self):
+        deals_sorted = sorted(self.deals, key=lambda x: x['deals'][0]['price']['amount'])
         
         deals_cut = list(islice(deals_sorted, 25))
         return deals_cut
