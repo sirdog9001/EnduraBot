@@ -3,3 +3,4 @@
 *[UUID]: Universally Unique Identifier
 *[UUIDs]: Universally Unique Identifier
 *[ITAD]: IsThereAnyDeal
+*[RGIT]: Regular Games Irregular Times

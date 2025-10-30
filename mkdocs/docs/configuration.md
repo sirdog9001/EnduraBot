@@ -1,10 +1,10 @@
-EnduraBot's configuration takes place in 3 files located in `data`.
+EnduraBot's configuration takes place in 3 files located in `data/`.
 
 - `misc_text.json`
 - `permissions.json`
 - `variables.json`
 
-`permissions.json` has it's [own page](permissions.md). 
+`permissions.json` has it's [own page](permissions.md).
 
 
 ## variables.json
@@ -53,6 +53,12 @@ The meat and potatoes of the configuration is located at `variables.json`.
 `rquote_cooldown_in_minutes`
 :   The cooldown time, in minutes, that should take effect once a non-exempt role runs `/rquote`.
 
+`rgit_deals_cooldown_in_seconds`
+:   The cooldown time, in seconds, that should take effect once anyone uses `/rgit-deals`.
+
+`bot_insult_chance`
+:   The percentage chance the bot has to insult someone when pinged. `0` would make the bot *never* insult someone and `1` would make the bot *always* insult someone.
+
 `bibleq_hour_of_day`
 :   The hour of the day, in UTC, that the bible quote should be sent to `based_chat_channel_id`.
 
@@ -69,7 +75,7 @@ The meat and potatoes of the configuration is located at `variables.json`.
 
 `rquote_themes`
 :   A list of JSON objects.
-: The key is the name of an `/rquote` theme. 
+: The key is the name of an `/rquote` theme.
 : The `title` is the title of the embed of the theme (see green box in above image).
 : The `color` is the integer of the color the embed (see embed in above image).
 : The `opener_key` should correspond to a JSON object key at `misc_text.json` where it has a value, acting as a JSON list, of potential opener phrases (see red box in above image).
@@ -94,7 +100,7 @@ Now, let's look at `misc_text.json`.
 `bot_insults`
 :   Possible insults that the bot will use when the `bot_insults.py` listener detects a member pings the bot.
 
-The remaining items should look familiar given they were present in `variables.json`. 
+The remaining items should look familiar given they were present in `variables.json`.
 
 ![Example of /quote](assets/rquote-example.png)
 

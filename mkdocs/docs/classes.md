@@ -1,7 +1,9 @@
 EnduraBot uses various custom-made classes to enhance it's functionality. These are stored in `classes/`.
 
 ## DBBlacklist
-This class is stored in `classes/db_blacklist_handler.py`. When initiated it creates a connection to the `endurabot.db` database and, if the table does not already exist, creates the `blacklist` table.
+This class is stored at `classes/db_blacklist_handler.py`.
+
+When initiated a connection to the `endurabot.db` database is made and, if the table does not already exist, the `blacklist` table is created.
 
 ### check_status()
 This method accepts the following arguements:
@@ -13,8 +15,8 @@ The method will return `True` if the member is blacklisted and `False` if they a
 ### add_user()
 This method accepts the following arguements:
 
-- `target_id`: The Discord ID of a member to blacklist.
-- `mod_id`: The Discord ID of a member who performed the blacklisting.
+- `target_id`: The Discord ID of the member to blacklist.
+- `mod_id`: The Discord ID of the member who performed the blacklisting.
 
 The method will check if the `target_id` is in the blacklist and, if so, will raise a `ValueError`.
 
@@ -30,12 +32,14 @@ The method will check if the `target_id` is in the blacklist and, if not, will r
 If no errors are raised the `target_id` will be removed from the blacklist.
 
 ## DBRGITGames
-This class is stored in `classes/db_rgit_games_handler.py`. When initiated it creates a connection to the `endurabot.db` database and, if the table does not already exist, creates the `rgit_games` table.
+This class is stored at `classes/db_rgit_games_handler.py`.
+
+When initiated a connection to the `endurabot.db` database is made and, if the table does not already exist, the `rgit_games` table is created.
 
 ### check_if_exists()
 This method accepts the following arguements:
 
-- `id`: The IsThereAnyDeal UUID of a game.
+- `id`: The ITAD UUID of a game.
 
 This method will return `not None` if the UUID is in the RGIT table and `False` if it is not.
 
@@ -46,7 +50,7 @@ This method will return `not None` if the UUID is in the RGIT table and `False` 
 This method accepts the following arguements:
 
 - `title`: The fancy title of a game.
-- `game_id`: The IsThereAnyDeal UUID of a game.
+- `game_id`: The ITAD UUID of a game.
 - `user_id`: The Discord ID of a member.
 
 This method will check if the `game_id` is already in the RGIT table and, if so, will raise a `ValueError`. It will also check if more than 150 rows exist in the table and, if so, raise a `RuntimeError`.
@@ -56,7 +60,7 @@ If no errors are raised the method will add the `title` and `game_id` to the RGI
 ### remove_game()
 This method accepts the following arguements:
 
-- `id`: The IsThereAnyDeal UUID of a game.
+- `id`: The ITAD UUID of a game.
 
 This method will check if the `game_id` is already in the table and, if not, will raise a `ValueError`.
 
@@ -78,22 +82,22 @@ This method accepts no arguements.
 This method returns a Python list of key:value pairs where the `key` is an IsThereAnyDeal UUID and the `value` is the fancy game title associated with the UUID.
 
 ## ItadGameSearchHandler
-This class is stored in `classes/itad_get_games_handler.py`.
+This class is stored at `classes/itad_get_games_handler.py`.
 
 This class accepts the following arguements:
 
 - `title`: A fancy game title.
 
-When initiated the `title` is sent to the IsThereAnyDeal API to see if an associated game and it's UUID can be found. If the API token is not accepted it will raise a `TypeError`.
+When initiated the `title` is sent to the ITAD API to see if an associated game and it's UUID can be found. If the API token is not accepted it will raise a `TypeError`.
 
 If the API does not return expected data, or indicates the game could not be found, the class will raise a `ValueError`.
 
-If a found game's boxart or a release date is not found the relevant attributes will be set to none.
+If a found game's boxart or release date is not found the relevant attributes will be set to generic values.
 
 When initialization completes the following class attributes are made available:
 
 - `self.title`: The fancy title of the game found by the API.
-- `self.id`: The IsThereAnyDeal UUID of the game found by the API.
+- `self.id`: The ITAD UUID of the game found by the API.
 - `self.boxart`: The URL to the boxart of the game found by the API.
 - `self.release_date`: The release date in ISO format for the game found by the API.
 - `self.publishers`: A Python list of the publishers of the game found by the API.
@@ -135,13 +139,13 @@ This method accepts no arguements.
 This method returns the `self.tags` attribute.
 
 ## ItadGameDealsHandler
-This class is stored in `classes/itad_get_games_handler.py`.
+This class is stored at `classes/itad_get_games_handler.py`.
 
 This class accepts the following arguements:
 
-- `deals_list`: A Python list of IsThereAnyDeal UUIDs. Designed to accept the method [`get_ids()`](#get_ids) from [`DBRGITGames`](#dbrgitgames).
+- `deals_list`: A Python list of ITAD UUIDs. Designed to accept the method [`get_ids()`](#get_ids) from [`DBRGITGames`](#dbrgitgames).
 
-When initiated the `deals_list` is sent to the IsThereAnyDeal API and receives back a list of JSON objects which represent which of the games in the `deals_list` have deals.
+When initiated the `deals_list` is sent to the ITAD API and receives back a list of JSON objects which represent which of the games in the `deals_list` have deals.
 
 The API is instructed in the sent HTTP header to only return deals and only return a single `shop`[^1] object per deal.
 
