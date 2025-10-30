@@ -9,9 +9,8 @@
 | `/echo` | Moderators | Static  | Make EnduraBot say something. |
 | `/editrole` | Moderators | Static | Add or remove configurable roles from a member. |
 | `/estop` | Moderators and Systems Operators | Static | Shutdown EnduraBot as an emergency measure. |
-| `/info` | Anyone | Ephemeral | Get generic information about a server member. |
-| `/ips` | Anyone | Static | Get connection information for the various servers hosted by EDC. |
-| `/links` | Anyone | Static | Get list of URLs that relate to EDC. |
+| `/user` | Anyone | Ephemeral | Get generic information about a server member. |
+| `/info` | Anyone | Static | Get various information relevant to EDC by selecting one of the available options. |
 | `/reboot` | Systems Operators | Ephemeral | Reboot EnduraBot. |
 | `/rgit-deals` | Full Member | Static | Get a list of upto 25 deals for games submitted as options for RGIT. |
 | `/rgit-edit` | Moderators |  Ephemeral | Add or remove games from the RGIT table used by `/rgit-deals`. |

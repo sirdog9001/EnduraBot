@@ -65,6 +65,7 @@ nav:
       - Configuration: configuration.md
       - Permissions: permissions.md
       - Classes: classes.md
+      - Random Quote: rquote.md
       - External APIs:
         - isthereanydeal-api.md
 

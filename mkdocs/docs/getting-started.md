@@ -198,7 +198,7 @@ Simply create a directory called `logs` in the same directory as `main.py`. This
 
 ## Python dependencies
 !!! info
-    You may wish to install these dependencies in a [virtualized environment](https://docs.python.org/3/library/venv.html) rather than your master Python environment. If you choose to do this, and you have not already, it may be worth adding `venv` as a folder to add to your global Git ignore file.
+    You may wish to install these dependencies in a [virtualized environment](https://docs.python.org/3/library/venv.html) rather than your master Python environment. If you choose to do this, and you have not already, it may be worth adding `venv` to your global Git ignore file.
 
 There are Python specific dependencies required for EnduraBot to run. You may install them by running the following from within the directory housing the text file:
 ``` sh
@@ -224,3 +224,15 @@ You should see something like this:
 ```
 
 Once you see the highlighted line the bot is functioning and ready to go. It may sometimes take awhile for commands to sync; they will typically still work before the highlighted line appears but unexpected behavior may occur.
+
+## Considerations
+If you have made it this far, congratulations, you now have your very own instance of EnduraBot. I hope you have fun with it.
+
+There are some quirks to be made aware of, both because a) this bot isn't *designed* for public use and b) because I am not a professional software developer.
+
+- You will really want to add atleast *one* game to your RGIT table by using `/rgit-edit` with the `Add Game` option as soon as possible. Otherwise, if you run `/rgit-deals`, you will get a cryptic message saying EnduraBot didn't respond. This is because EnduraBot doesn't know how to gracefully handle an empty RGIT table.
+- If you haven't already, unless you are only ever going to tinker with EnduraBot privately, you probably want to get your [permissions](permissions.md) squared away.
+- Those who are astute will notice that a `Dockerfile` and `docker-compose.yml` exist in this repository. You are more than welcome to use them to host EnduraBot in a Docker container. I just do not feel confident documenting those steps (nor am I interested in maintaining such documentation). Plenty of tutorials exist regarding Docker, though.
+- In regards to `/rquote`:
+    - Ensure everyone puts their out of context quotes in `""` or they won't be picked. If you want this to change you'll need to edit code at `cogs/rquote.py` (more details available at the [page dedicated to rquote](rquote.md)).
+    - If you are starting from an empty channel please ensure atleast 1 quote is present before someone runs `/rquote`.

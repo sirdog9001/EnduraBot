@@ -21,10 +21,10 @@ As a funny feature `listeners/bot_insult.py` was made to listen for any time a p
 If someone pings the bot it will generate a random float between `0` and `1`. If the generated float is less than or equal to the value set at `data/variables.json` as `bot_insult_chance` the bot will insult the user. Insults are held at `data/misc_text.json` under the `bot_insults` key.
 
 ## Invite tracking
-As administrative utilities `listeners/invites_creation.py` and `listeners/invites_made.py` were made.
+As administrative utilities `listeners/invites_creation.py` and `listeners/invites_use.py` were made.
 
 `invites_creation.py` simply listens to new `on_invite_create` events and logs to `logs/endurabot.log` everytime an invite is made, the code generated, and who made it.
 
-`invites_creation` is a more sophisticated listener which monitors all the invites, and their use-count, on bot startup - this information passed to it by `main.py`. It then listens to new `on_member_join` events.
+`invites_use` is a more sophisticated listener which monitors all the invites and their use-count. It then listens to new `on_member_join` events.
 
 When it detects that someone joins it looks to see which invite's use count increased. It then determines that such an invite was the one the new member just used. With this information it logs to `logs/endurabot.log` that a person joined the server, that the new person used the detected invite code, then it logs the original creator of the invite and when the invite was originally made.

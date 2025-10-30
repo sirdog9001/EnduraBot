@@ -175,7 +175,7 @@ This endpoint requires the following URL query parameters be sent via an HTTP `P
 
 This endpoint *also requires* that the request body be given a list of ITAD game UUIDs. This is done by passing them into the `json=` parameter of `#!python requests.post()`.
 
-The endpoint returns JSON structured like the example below for each game returned. `capacity` was set to `1` in the example for brevity.
+The endpoint returns JSON structured like the example below *for each game*. `capacity` was set to `1` in the example for brevity.
 ```json
 [
   {
