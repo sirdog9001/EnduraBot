@@ -23,6 +23,8 @@ class DebugOnlyFilter(logging.Filter):
     def filter(self, record):
         return record.levelno == logging.DEBUG
 
+# Custom filter so that `discord.gateway` does't log anything below the WARNING level.
+logging.getLogger("discord.gateway").setLevel(logging.WARNING + 1)
 
 # Custom formatting for BOOT
 class CustomBootFormatter(logging.Formatter):
@@ -43,18 +45,18 @@ def configure_logging():
     logger.setLevel(logging.DEBUG)
 
     discord_logger = logging.getLogger('discord')
-    discord_logger.setLevel(logging.INFO) 
+    discord_logger.setLevel(logging.INFO)
 
-    standard_formatter = CustomBootFormatter( 
+    standard_formatter = CustomBootFormatter(
         fmt='[%(asctime)s]:%(levelname)s:%(name)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
-    ) 
+    )
 
     file_handler = logging.FileHandler(filename="logs/endurabot.log", encoding='utf-8', mode='a')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(standard_formatter)
     logger.addHandler(file_handler)
-    discord_logger.addHandler(file_handler)   
+    discord_logger.addHandler(file_handler)
 
 
     file_handler_debug = logging.FileHandler(filename="logs/endurabot_debug.log", encoding='utf-8', mode='a')
@@ -69,7 +71,7 @@ def configure_logging():
     console_handler.setFormatter(standard_formatter)
     logger.addHandler(console_handler)
     discord_logger.addHandler(console_handler)
-    
+
     now = datetime.datetime.now()
     boot_message = f"--- {now.strftime('%A, %B %d, %Y (%Y%m%d)')} | {now.strftime('%H:%M')} ---"
     logger.log(BOOT, boot_message)
