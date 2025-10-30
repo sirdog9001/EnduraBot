@@ -26,20 +26,20 @@ class user_cmds(commands.Cog):
         self.misc_data = MISC_DATA
         self.settings_data_g = config_loader.SETTINGS_DATA
         self.misc_data_g = config_loader.MISC_DATA
-    
+
         self.default_allowed_mentions = AllowedMentions(
                 everyone=False,
-                users=True, 
-                roles=True      
+                users=True,
+                roles=True
             )
 
-    # --- COMMAND: /info ---
+    # --- COMMAND: /user ---
 
-    @app_commands.command(name="info", description="Get information on a server member.")
+    @app_commands.command(name="user", description="Get information on a server member.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-    async def info(self, interaction: discord.Interaction, user: discord.Member):
-        
+    async def user(self, interaction: discord.Interaction, user: discord.Member):
+
         create_epoch = round(user.created_at.timestamp()) #Get UNIX timestamp for when the member's account was created.
         join_epoch = round(user.joined_at.timestamp()) #Get UNIX timestamp for when member joined the Discord.
         role_ids = [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"] #Get list of all role IDs the user has, excluding the default @@everyone role.
@@ -78,12 +78,12 @@ class user_cmds(commands.Cog):
         embed.add_field(name="Server Staff?", value=is_staff)
         embed.add_field(name="Bot?", value=bot_emoji)
         embed.add_field(name="Has Nitro?", value=premium_emoji)
-        
+
         if len(user.roles) == 1: #We do -1 to exclude @@everyone.
             embed.add_field(name="Roles", value="None", inline=False)
         else:
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
-        
+
         await interaction.response.send_message(embed=embed, ephemeral=True)
         logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info on {user.name} ({user.id}).")
 
@@ -93,10 +93,10 @@ class user_cmds(commands.Cog):
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
     async def about(self, interaction: discord.Interaction):
-        
+
         repo = self.settings_data.get("repo")
         version = self.settings_data.get("version")
-        
+
         embed = discord.Embed(
             title="About me",
             description=f"Hello! My name is EnduraBot. I am a general purpose bot made for the Endurance Coalition. My creator is <@281589411962028034>.",
@@ -115,7 +115,7 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-    
+
     async def alert(self, interaction: discord.Interaction, desc: str):
 
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
@@ -123,10 +123,10 @@ class user_cmds(commands.Cog):
 
         await interaction.response.send_message(content="Your report has been submitted.", ephemeral=True)
         await guild_alert_channel.send(
-            content=f"# :rotating_light: INCIDENT ALERT :rotating_light:\n\n **Attention**: {sysop_role.mention}\n\n **Reporting User**: {interaction.user.mention} (from <#{interaction.channel.id}>) \n\n **Details**: \"{desc}\" \n\n Systems operator investigation requested! Please post in this channel and notify {interaction.user.mention} when investigation begins.", 
+            content=f"# :rotating_light: INCIDENT ALERT :rotating_light:\n\n **Attention**: {sysop_role.mention}\n\n **Reporting User**: {interaction.user.mention} (from <#{interaction.channel.id}>) \n\n **Details**: \"{desc}\" \n\n Systems operator investigation requested! Please post in this channel and notify {interaction.user.mention} when investigation begins.",
             allowed_mentions=self.default_allowed_mentions
             )
-        
+
         logger.critical(f"{interaction.user.name} ({interaction.user.id}) submitted an alert to systems operators with the context: [{desc}].")
 
     # --- COMMAND: /estop ---
@@ -139,70 +139,69 @@ class user_cmds(commands.Cog):
 
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
         sysop_role_id = interaction.guild.get_role(self.settings_data.get("sysop_role_id"))
-        
+
         await interaction.response.send_message(content=f"Emergency stop has been activated. Report sent to <#{guild_alert_channel.id}>.", ephemeral=True)
         await guild_alert_channel.send(
-            content=f"# :warning: Emergency Stop Activation\n\n{sysop_role_id.mention}\n\n {interaction.user.mention} activated EnduraBot's **emergency stop** at this time. Please speak with them for details.\n\n EnduraBot will need to be manually rebooted in Portainer.", 
+            content=f"# :warning: Emergency Stop Activation\n\n{sysop_role_id.mention}\n\n {interaction.user.mention} activated EnduraBot's **emergency stop** at this time. Please speak with them for details.\n\n EnduraBot will need to be manually rebooted in Portainer.",
             allowed_mentions=self.default_allowed_mentions
             )
-        
+
         logger.critical(f"Emergency stop activated by {interaction.user.name} ({interaction.user.id}). Shutting down...")
         await self.bot.close()
 
-# --- COMMAND: /links ---
+# --- COMMAND: /info ---
 
-    @app_commands.command(name="links", description="Quick access to EDC relevant links.")
-    @app_commands.check(check_permissions)    
-    @app_commands.guilds(GUILD_ID)
-    async def links(self, interaction: discord.Interaction):
-
-        links_list = self.settings_data.get("edc_links", {})
-
-        embed = discord.Embed(
-            title="Endurance Coalition Links",
-            color=discord.Color.purple()
-        )
-
-        for url, description in links_list.items():
-            embed.add_field(
-                name=description,
-                value=url,
-                inline=False
-            )
-        
-        await interaction.response.send_message(embed=embed)
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /links in #{interaction.channel.name} ({interaction.channel.id}).")
-
-        return
-
-# --- COMMAND: /ips ---
-
-    @app_commands.command(name="ips", description="Quick access to EDC relevant IPs and ports.")
+    @app_commands.command(name="info", description="Quick access to EDC relevant information.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-    async def ips(self, interaction: discord.Interaction):
+    @app_commands.choices(options = [
+        app_commands.Choice(name="Links",value="links"),
+        app_commands.Choice(name="IP Addresses / Ports",value="ports")
+])
+    async def info(self, interaction: discord.Interaction, options: app_commands.Choice[str]):
 
-        ports_list = self.settings_data.get("edc_ports", {})
-        edc_ip = self.settings_data.get("edc_ip")
-        edc_url = self.settings_data.get("edc_url")
+        if options.value == "links":
 
-        embed = discord.Embed(
-            title="Endurance Coalition IP Addresses",
-            description=f"Most games should accept `{edc_url}` as our IP address. Just append the port to the end like usual.\n\n If for some reason that does not work, our *raw* IP is `{edc_ip}`.",
-            color=discord.Color.blue()
-        )
+            links_list = self.settings_data.get("edc_links", {})
 
-        for game, port in ports_list.items():
-            embed.add_field(
-                name=game,
-                value=port,
-                inline=False
+            embed = discord.Embed(
+                title="Endurance Coalition Links",
+                color=discord.Color.purple()
             )
-        
-        await interaction.response.send_message(embed=embed)
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /ips in #{interaction.channel.name} ({interaction.channel.id}).")
 
-        return
+            for url, description in links_list.items():
+                embed.add_field(
+                    name=description,
+                    value=url,
+                    inline=False
+                )
+
+            await interaction.response.send_message(embed=embed)
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info and asked for LINKS in #{interaction.channel.name} ({interaction.channel.id}).")
+            return
+
+        if options.value == "ports":
+
+            ports_list = self.settings_data.get("edc_ports", {})
+            edc_ip = self.settings_data.get("edc_ip")
+            edc_url = self.settings_data.get("edc_url")
+
+            embed = discord.Embed(
+                title="Endurance Coalition IP Addresses",
+                description=f"Most games should accept `{edc_url}` as our IP address. Just append the port to the end like usual.\n\n If for some reason that does not work, our *raw* IP is `{edc_ip}`.",
+                color=discord.Color.blue()
+            )
+
+            for game, port in ports_list.items():
+                embed.add_field(
+                    name=game,
+                    value=port,
+                    inline=False
+                )
+
+            await interaction.response.send_message(embed=embed)
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info and asked for IP ADDRESSES / PORTS in #{interaction.channel.name} ({interaction.channel.id}).")
+            return
 
 # --- COMMAND: /reboot ---
 
@@ -226,6 +225,6 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) sent a message as EnduraBot with content [{msg}].")
         await interaction.response.send_message("Message sent.", ephemeral=True)
         await interaction.channel.send(msg)
-        
+
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
