@@ -59,6 +59,7 @@ nav:
       - Getting Started: getting-started.md
       - Configuration: configuration.md
       - Permissions: permissions.md
+      - Classes: classes.md
 
 watch:
   - docs/includes
