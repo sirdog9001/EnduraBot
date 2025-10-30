@@ -6,10 +6,11 @@ You will need the following before you begin.
 - [Python 3.13](https://www.python.org/) or greater installed on your machine.
 - [Git](https://git-scm.com/install/) installed on your machine.
 - A [Discord bot token](#bot-setup-and-invitation).
+- An [IsThereAnyDeal API](#isthereanydeal-api-token) token.
 - Have sufficient permissions to invite a bot to a Discord server. It's suggested to make a dedicated one to tinker with EnduraBot.
 
 ## On Discord IDs
-Configuration will be dependent on IDs for various Discord-related things being obtained. 
+Configuration will be dependent on IDs for various Discord-related things being obtained.
 
 To get an ID for things you must enable Discord developer mode. This is done by going to the `User Settings` cog, scrolling down to `Advanced`, then ticking `Developer Mode`.
 
@@ -21,23 +22,39 @@ To get the ID for something you will typically right-click on it and select the 
 
 Before we do anything with EnduraBot's code you'll need a bot application through the [Discord developer portal](https://discord.com/developers/applications) in order to allow the bot to join a server.
 
-Once at the portal click `New Application`, give the bot a name (presumably you'll name it `EnduraBot`), agree to the *Developer Terms of Service* and *Developer Policy*, then click `Create`. On the new screen, retype the bot's name and optionally provide an avatar.[^1]
+Once at the portal click `New Application`, give the bot a name (presumably you'll name it `EnduraBot`), agree to the *Developer Terms of Service* and *Developer Policy*, then click `Create`. On the new screen retype the bot's name and optionally provide an avatar.[^1]
 
-Now, navigate to the `Bot` tab. Enable the `Presence Intent`, `Server Members Intent`, and `Message Content Intent`. Then click `Reset Token`. Once confirmed, you should see a long string of letters and numbers appear. This is the bot token mentioned in the [requirements](#requirements) section. Hold onto it and store it in a secure place on your computer.
+Now, navigate to the `Bot` tab located on the left of the screen. Scroll down and enable the `Presence Intent`, `Server Members Intent`, and `Message Content Intent`. Then, scroll back up and click `Reset Token`.
 
-Next, go to the `OAuth2` tab. Under the `OAuth2 URL Generator` box select the following:
+Once you confirm you wish to reset the token you should see a long string of letters and numbers appear. This is the bot token mentioned in the [requirements](#requirements) section. Hold onto it and store it in a secure place on your computer (such as a dedicated [password manager](https://en.wikipedia.org/wiki/Password_manager)).
+
+Next, go to the `OAuth2` tab. Scroll down to the `OAuth2 URL Generator` box and select the following:
 
 - `bot`
 - `applications.commands`
 
 When you select `bot` a new sub-box should appear below called `BOT PERMISSIONS`. Select `Administrator`.
 
-At the very bottom you will have a `Generated URL`. Paste that into a browser and you will be given the option to invite the bot to a server.
+At the very bottom you will have a `Generated URL`. Ensure the option above it is set to `Guild Install` and not `User Install`. Then paste that into a browser and Discord will guide you through inviting the bot.
 
 [^1]: You can use the image located at `/mkdocs/docs/assets/EnduraBot_Logo.png` in the EnduraBot repository if you would like.
 
+## IsThereAnyDeal API token
+!!! warning
+    Per the MIT license it is *your* responsibility to ensure that your use of the IsThereAnyDeal API is in-line with their [API terms of service](https://docs.isthereanydeal.com/#section/Terms-of-Service).
+
+In order to access the IsThereAnyDeal API, which is what allows `/rgit-edit` and `/rgit-deals` to function, an API token needs to be obtained. This is quite simple.
+
+1. Navigate to [https://isthereanydeal.com/apps/](https://isthereanydeal.com/apps/).
+2. Click `Sign in to register an app`.
+3. Create an account or sign in through STEAM.
+4. Click `Register App` and give your application a unique name.
+5. Click the green box underneath the `API Keys` header.
+
+Like with the Discord bot token, hold onto this and store it securely on your computer.
+
 ## Cloning the repository
-Navigate in a terminal to the directory you desire to house EnduraBot's code and then run the following command:
+Navigate in a terminal to the directory you desire to house EnduraBot's code. It's advised to use an IDE which has a terminal built in, such as [Visual Studio Code](https://code.visualstudio.com/). Then, run the following command:
 ``` sh
 git clone https://github.com/sirdog9001/EnduraBot.git
 ```
@@ -47,25 +64,32 @@ Note that this will create a directory called `EnduraBot` *inside* of the direct
 
 ### Environment variables
 !!! danger
-    Your real `.env` file with the `guild` and `token` should *never* leave your machine and/or wherever EnduraBot is being hosted. It absolutely should *not* be committed to any remote repository.
+    Your real `.env` file should *never* leave your machine and/or wherever EnduraBot is being hosted. It absolutely should *not* be committed to any Git repository; especially a remote one. It's highly advised you add this to your global Git ignore file.
 
-Take `.env-example`, copy it into the directory that houses `main.py`, then rename it to `.env`. This expects 2 variables:
+Take `.env-example`, copy it into the directory that houses `main.py`, then rename it to `.env`. This expects a couple of variables:
 
-```sh
+```sh title=".env"
 guild=
 token=
+itad-token=
 ```
 
 The `guild` is the Discord server ID for the server that you want EnduraBot to join. EnduraBot will leave any server that does not match this ID.
 
 The `token` is the bot token you got from the Discord developer portal.
 
+The `itad-token` is the IsThereAnyDeal token you got from IsThereAnyDeal.
+
 When done you should see the following structure:
-``` hl_lines="5"
+``` hl_lines="9"
 .
+|── classes/
 |── cogs/
 |── data/
+|── listeners/
 |── mkdocs/
+|── tasks/
+|── utils
 |── .env
 |── .env-example
 |── .gitignore
@@ -99,7 +123,9 @@ Copy and paste them all into `data` and rename them to remove the `_example`. Th
 |   └── variables.json
 ```
 
-`misc_text.json` may be left alone. If you have the `Adminsitrator` permission on the server that will host EnduraBot you may also do this with `permissions.json`. An alternative is to blank the file and replace it with `{}`, though be warned that this means *anyone* on the server can use *any* command. 
+Due to the `.gitignore` that comes with the repository they should automatically not be tracked once renamed.
+
+`misc_text.json` may be left alone. If you have the `Adminsitrator` permission on the server that will host EnduraBot you may also do this with `permissions.json`. An alternative is to blank the file and replace it with `{}`, though be warned that this means *anyone* on the server can use *any* command.
 
 If neither option is viable review the documentation on [permissions](permissions.md).
 
@@ -130,9 +156,9 @@ For EnduraBot to work the following variables in `variables.json` need proper ID
 6. Role that represents a server administrator. Used by `/info` to determine if the member is a staff member.
 7. List of role IDs that bypass the `/rquote` cooldown.
 
-There is also a list of key value pairs at variable `mod_editable_roles`. 
+There is also a list of key value pairs at variable `mod_editable_roles`.
 
-```json title="variables.json" 
+```json title="variables.json"
 "mod_editable_roles": {
         "dummy_role_a": 1122334455667788990,
         "dummy_role_b": 2233445566778899001,
@@ -142,19 +168,23 @@ There is also a list of key value pairs at variable `mod_editable_roles`.
 
 The keys (e.g `dummy_role_a`) serve no programmatic purpose and are purely for readability. The IDs should be role IDs that you'd like `/editrole` to be able to manipulate, otherwise it will not function.
 
-Other variables can be configured to your liking and are documented more properly at XXX.
+Other variables can be configured to your liking and are documented more properly at the [configuration page](configuration.md).
 
 ### Logs folder
-EnduraBot does all logging to files. While it will automatically create the relevant files on startup it will *not* create the *directory* it expects them in. 
+EnduraBot does all logging to files. While it will automatically create the relevant files on startup it will *not* create the *directory* it expects them in.
 
 Simply create a directory called `logs` in the same directory as `main.py`. This should result in the following structure:
 
-``` hl_lines="4"
+``` hl_lines="6"
 .
+|── classes/
 |── cogs/
 |── data/
+|── listeners/
 |── logs/
 |── mkdocs/
+|── tasks/
+|── utils/
 |── .env
 |── .env-example
 |── .gitignore
@@ -168,9 +198,9 @@ Simply create a directory called `logs` in the same directory as `main.py`. This
 
 ## Python dependencies
 !!! info
-    You may wish to install these dependencies in a [virtualized environment](https://docs.python.org/3/library/venv.html) rather than your master Python environment.
+    You may wish to install these dependencies in a [virtualized environment](https://docs.python.org/3/library/venv.html) rather than your master Python environment. If you choose to do this, and you have not already, it may be worth adding `venv` as a folder to add to your global Git ignore file.
 
-There are 2 Python specific dependencies required for EnduraBot to run. You may install them by running the following from within the directory housing the text file:
+There are Python specific dependencies required for EnduraBot to run. You may install them by running the following from within the directory housing the text file:
 ``` sh
 pip install -r requirements.txt
 ```
@@ -189,7 +219,7 @@ You should see something like this:
 [20XX-XX-XX XX:XX:XX]:INFO:endurabot: Loaded cogs.user_cmds
 [20XX-XX-XX XX:XX:XX]:INFO:endurabot.cogs.bible_daily: Waiting for bot to be ready before starting daily bible quote loop...
 [20XX-XX-XX XX:XX:XX]:INFO:endurabot.cogs.bible_daily: Bot ready, starting daily bible quote loop.
-[20XX-XX-XX XX:XX:XX]:INFO:endurabot: Synced 11 commands.
+[20XX-XX-XX XX:XX:XX]:INFO:endurabot: Synced X commands.
 [20XX-XX-XX XX:XX:XX]:INFO:endurabot: Hello, world! I am awake and ready to work!
 ```
 

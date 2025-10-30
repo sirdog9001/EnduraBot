@@ -33,5 +33,3 @@ Lets take a look at the `/info` command.
 
 In the above case the programmatic name for the command is `info`. It is the name of the declared asynchronus function (`#!python async def`) following the decorator registering a Discord application command (`#!python @app_commands.command()`).
 
-The code in the above command that actually performs the permissions check is `#!python  @app_commands.check(check_permissions)`. `#!python check_permissions()` is a function defined at `utils/permissions_checker.py` and is imported by every cog.
-

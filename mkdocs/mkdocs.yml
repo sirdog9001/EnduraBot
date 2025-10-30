@@ -47,17 +47,21 @@ markdown_extensions:
   - footnotes
   - attr_list
   - pymdownx.emoji:
-     emoji_generator: !!python/name:material.extensions.emoji.to_svg 
-     emoji_index: !!python/name:material.extensions.emoji.twemoji 
+     emoji_generator: !!python/name:material.extensions.emoji.to_svg
+     emoji_index: !!python/name:material.extensions.emoji.twemoji
   - pymdownx.snippets:
       auto_append:
-        - includes/glossary.md
+        - docs/includes/glossary.md
 nav:
   - Welcome: index.md
+  - Commands: commands.md
   - Developers:
       - Getting Started: getting-started.md
       - Configuration: configuration.md
       - Permissions: permissions.md
+
+watch:
+  - docs/includes
 
 copyright: Text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 License</a> unless otherwise noted.
 
