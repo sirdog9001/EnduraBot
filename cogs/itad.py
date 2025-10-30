@@ -33,7 +33,7 @@ class AddView(discord.ui.View):
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green, emoji="✅")
     async def returnTrue(self, interaction: discord.Interaction, button):
-        
+
         try:
             db.add_game(self.title, self.game_id, interaction.user.id)
         except ValueError:
@@ -52,7 +52,7 @@ class AddView(discord.ui.View):
             await interaction.response.send_message("Game did not have all expected information. Please notify Sirdog.", ephemeral=True)
             logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to add {self.title} ({self.game_id}) and the API did not give back all expected information.")
             return
-        
+
         await interaction.response.send_message("Game added.", ephemeral=True)
         logger.info(f"{interaction.user.name} ({interaction.user.id}) successfully adds {self.title} ({self.game_id}) to the RGIT table.")
         self.stop()
@@ -64,25 +64,25 @@ class AddView(discord.ui.View):
         self.stop()
 
 async def addGamePrompt(interaction: discord.Interaction, title):
-    
+
     # If the user indicates they want to add a game, run this function.
 
     try:
-        
+
         itad_search = ItadGameSearchHandler(title)
         logger.debug(f"{interaction.user.name} ({interaction.user.id}) has passed all exception checks for [{title}] at [addGamePrompt()].")
         await interaction.response.defer(ephemeral=True)
         embed = discord.Embed(
             title=itad_search.get_title(),
-            color=16777215 
-            ) 
+            color=16777215
+            )
         embed.set_image(url=itad_search.get_boxart())
-       
+
         if itad_search.get_release_date() == "Unreleased":
             embed.add_field(name="Released", value="Unreleased", inline=False)
         else:
              embed.add_field(name="Released", value=datetime.datetime.strptime(itad_search.get_release_date(), '%Y-%m-%d').strftime('%B %d, %Y'), inline=False)
-       
+
         embed.add_field(name="Publishers", value=', '.join(itad_search.get_publishers()), inline=False)
         embed.add_field(name="Tags", value=', '.join(itad_search.get_tags()), inline=False)
         embed.set_footer(text="Powered by the IsThereAnyDeal API.")
@@ -90,12 +90,12 @@ async def addGamePrompt(interaction: discord.Interaction, title):
         await interaction.followup.send(content="Is this the game you wish to add?", embed=embed, view=view, ephemeral=True)
         logger.debug(f"API successfully finds {title} ({itad_search.get_id()}). {interaction.user.name} ({interaction.user.id}) prompted to confirm or deny action.")
         await view.wait()
-    
+
     except ValueError:
         await interaction.response.send_message("The game could not be found. Please try again. Please be *very* specific; special characters and capitalization *do* matter.", ephemeral=True)
         logger.error(f"API unable to find [{title}] for {interaction.user.name} ({interaction.user.id}).")
         return
-    
+
     except RuntimeError:
         await interaction.response.send_message("Due to character limits additional games may not be added. Please speak with Sirdog.")
         logger.critical(f"{interaction.user.name} ({interaction.user.id}) attempted to exceed soft-limit of RGIT games. (P2)")
@@ -104,7 +104,7 @@ async def addGamePrompt(interaction: discord.Interaction, title):
 async def removeGame(interaction: discord.Interaction, title):
 
      # If the user indicates they want to remove a game, run this function.
-            
+
     rgit_game = ItadGameSearchHandler(title)
     rgit_games_db = DBRGITGames()
     await interaction.response.defer(ephemeral=True)
@@ -113,7 +113,7 @@ async def removeGame(interaction: discord.Interaction, title):
         await interaction.followup.send("The game is not in the database.", ephemeral=True)
         logger.info(f"{interaction.user.name} ({interaction.user.id}) attempted to remove {title} when it wasn't in the RGIT table.")
         return
-    
+
     rgit_games_db.remove_game(rgit_game.get_id())
     await interaction.followup.send("Game removed.", ephemeral=True)
     logger.info(f"{interaction.user.name} ({interaction.user.id}) successfully removes {title} ({rgit_game.get_id()}) from the RGIT Table.")
@@ -127,11 +127,11 @@ class itad(commands.Cog):
         self.variables_file = {}
         self.settings_data = SETTINGS_DATA
         self.settings_data_g = config_loader.SETTINGS_DATA
-    
+
         self.default_allowed_mentions = AllowedMentions(
                 everyone=False,
-                users=True, 
-                roles=True      
+                users=True,
+                roles=True
             )
 
  # --- /rgit-edit ---
@@ -146,15 +146,15 @@ class itad(commands.Cog):
     @app_commands.guilds(GUILD_ID)
     async def rgitedit(self, interaction: discord.Interaction, options: app_commands.Choice[str], title: str):
 
-        
+
         if options.value == "add":
-            
+
             await addGamePrompt(interaction, title)
-        
+
         else:
-            
+
            await removeGame(interaction, title)
-           
+
  # --- /rgit-table ---
  # Get a raw list of every game in the table.
 
@@ -167,7 +167,7 @@ class itad(commands.Cog):
 
         for game in db.list_games(): # Running the list_games() method of the RGITGames class, append every game name in the RGIT games table to the initiated list.
             temporary_list.append(f"- {game}")
-       
+
         games = "\n".join(temporary_list) #Join every item in the list together, initiating new lines per item.
 
         embed = discord.Embed(title="Games List", description=games, color=3800852)
@@ -186,36 +186,47 @@ class itad(commands.Cog):
         app_commands.Choice(name="Sort by Straight Price",value="price")
 ])
     @app_commands.guilds(GUILD_ID)
-    
+
     @app_commands.checks.cooldown(1, SETTINGS_DATA["rgit_deals_cooldown_in_seconds"], key=commands.BucketType.default)
     async def rgitdeals(self, interaction: discord.Interaction, options: app_commands.Choice[str],):
 
         deals = ItadGameDealsHandler(db.get_ids()) # Get deal data from ITAD API by running a method from DBRGITGames that gives a Python list of all game IDs in the DB.
-        name_to_id_dict = db.get_ids_and_names() # Get JSON key/value pairs where the key is a game's ITAD UUID and the value is the game's name. 
+        name_to_id_dict = db.get_ids_and_names() # Get JSON key/value pairs where the key is a game's ITAD UUID and the value is the game's name.
+
+        if not deals.get_deals_by_cut():
+
+            embed = discord.Embed(title=f":cry: No Deals",
+                        description="No deals exist for any RGIT games at this time.",
+                        color=8650752
+                        )
+            embed.set_footer(text="Powered by the IsThereAnyDeal API.")
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games but none were found.")
+            await interaction.response.send_message(embed=embed)
+            return
 
         if options.value == "cut":
             deals_sorted = deals.get_deals_by_cut()
             title = "Available Deals — Sorted by Percentage Off"
             log = f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games sorted by percentage off."
-        
+
         if options.value == "price":
             deals_sorted = deals.get_deals_by_price()
             title = "Available Deals — Sorted by Price"
             log = f"{interaction.user.name} ({interaction.user.id}) requested a list of deals for RGIT games sorted by price."
 
-        embed = discord.Embed(title=f":moneybag: {title}", 
+        embed = discord.Embed(title=f":moneybag: {title}",
                         description="The following are the current deals for RGIT games. Due to technical limitations only 25 deals are displayable.",
                         color=3800852
                         )
 
-        for deal in deals_sorted:  
+        for deal in deals_sorted:
 
-            # Get a game name's for each iterated deal by mapping the ID given by the ITAD API 
+            # Get a game name's for each iterated deal by mapping the ID given by the ITAD API
             # against the key/value pairs retrieved from the DB.
             # VVVVVVVVVVVVVVVV
-            
+
             id = deal["id"]
-            game_name = name_to_id_dict[id] 
+            game_name = name_to_id_dict[id]
 
             # ^^^^^^^^^^^^^^^
 
@@ -238,6 +249,6 @@ class itad(commands.Cog):
             else:
                 await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
                 logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the RGIT deals cooldown with {seconds} second(s) remaining.")
-        
+
 async def setup(bot):
     await bot.add_cog(itad(bot))
