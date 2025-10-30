@@ -74,11 +74,40 @@ The meat and potatoes of the configuration is located at `variables.json`.
 ![Example of /quote](assets/rquote-example.png)
 
 `rquote_themes`
-:   A list of JSON objects.
-: The key is the name of an `/rquote` theme.
-: The `title` is the title of the embed of the theme (see green box in above image).
-: The `color` is the integer of the color the embed (see embed in above image).
-: The `opener_key` should correspond to a JSON object key at `misc_text.json` where it has a value, acting as a JSON list, of potential opener phrases (see red box in above image).
+: A list of JSON objects that configure the `/rquote` themes; genres of fictional scenarios that quotes will be inserted into. Click the :material-plus-circle-outline: for an explanation of each item.
+
+```json
+"rquote_themes": {
+        "hr": { //(1)!
+            "title": ":briefcase: HR Office of EDC, Inc.", //(2)!
+            "color": 10181046, //(3)!
+            "opener_key": "ooc_hr" //(4)!
+        },
+        "dating": {
+            "title": ":heart_on_fire: A Love Story",
+            "color": 15277667,
+            "opener_key": "ooc_dating"
+        }
+}
+```
+
+1. A key which represents the programmatic name of the genre.
+2. The embed title the theme will use when selected (see above image, green box).
+3. The embed color the theme will use when selected (see above image).
+4.  A key which is used in conjunction with `misc_text.json`.
+
+    ```json
+    "ooc_court": [
+        "Let the record reflect that the defendant...",
+        "Your Honor, the prosecution's..."
+    ],
+    "ooc_hr": [
+        "Thank you for coming in...",
+        "So, regarding your contribution to the Q&A..."
+    ]
+    ```
+
+    This ensures that the opener dialogue for generated quotes always matches their theme (see above image, red box).
 
 ## misc_text.json
 Now, let's look at `misc_text.json`.

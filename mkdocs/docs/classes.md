@@ -74,12 +74,12 @@ This method returns a Python list of all the fancy game titles in the RGIT table
 ### get_ids()
 This method accepts no arguements.
 
-This method returns a Python list of all IsThereAnyDeal UUIDs in the RGIT table.
+This method returns a Python list of all ITAD UUIDs in the RGIT table.
 
 ### get_ids_and_names()
 This method accepts no arguements.
 
-This method returns a Python list of key:value pairs where the `key` is an IsThereAnyDeal UUID and the `value` is the fancy game title associated with the UUID.
+This method returns a Python list of dictionaries where the `key` is an ITAD UUID and the `value` is the fancy game title associated with the UUID.
 
 ## ItadGameSearchHandler
 This class is stored at `classes/itad_get_games_handler.py`.
@@ -139,19 +139,19 @@ This method accepts no arguements.
 This method returns the `self.tags` attribute.
 
 ## ItadGameDealsHandler
-This class is stored at `classes/itad_get_games_handler.py`.
+This class is stored at `classes/itad_get_deals_handler.py`.
 
 This class accepts the following arguements:
 
 - `deals_list`: A Python list of ITAD UUIDs. Designed to accept the method [`get_ids()`](#get_ids) from [`DBRGITGames`](#dbrgitgames).
 
-When initiated the `deals_list` is sent to the ITAD API and receives back a list of JSON objects which represent which of the games in the `deals_list` have deals.
+When initiated the `deals_list` is sent to the ITAD API. The API *should* send back a list of JSON objects which represent the games in the `deals_list` that have deals. If the API token is not accepted the class will raise a `TypeError`.
 
-The API is instructed in the sent HTTP header to only return deals and only return a single `shop`[^1] object per deal.
+The API is instructed in the URL parameters to *only* return deals and *only* return a single `shop`[^1] object per deal.
 
 When initialization completes the following class attributes are made available:
 
-- `self.deals`: The JSON returned by the IsThereAnyDeal API of games with deals.
+- `self.deals`: The JSON returned by the ITAD API of games with deals.
 - `self.list_of_ids`: The `deals_list` argument received by the class.
 
 ### get_deals_by_cut()

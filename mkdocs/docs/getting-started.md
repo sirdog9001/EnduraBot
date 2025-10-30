@@ -129,7 +129,7 @@ Due to the `.gitignore` that comes with the repository they should automatically
 
 If neither option is viable review the documentation on [permissions](permissions.md).
 
-For EnduraBot to work the following variables in `variables.json` need proper IDs added. Click the circles with a plus in them for an explanation.
+For EnduraBot to work the following variables in `variables.json` need proper IDs added. Click the :material-plus-circle-outline: for an explanation of each item.
 
 ``` json title="variables.json"
 

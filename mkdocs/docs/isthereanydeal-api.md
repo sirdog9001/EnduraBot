@@ -10,7 +10,7 @@ EnduraBot uses the following IsThereAnyDeal endpoints:
 The base URL for API calls to ITAD is `https://api.isthereanydeal.com`
 
 ## /games/lookup/v1
-This endpoint requires the following be sent to it via an HTTP `GET` header:
+This endpoint requires the following URL query parameters be sent via an HTTP `GET` header:
 ```json
 {"key": key, "title": title}
 ```
@@ -54,7 +54,7 @@ The following is returned if the API cannot find a game by the title given:
 ```
 
 ## /games/info/v2
-This endpoint requires the following be sent to it via an HTTP `GET` header:
+This endpoint requires the following URL query parameters be sent via an HTTP `GET` header:
 ```json
 {"key": key, "id": id}
 ```
@@ -163,17 +163,17 @@ The following is returned if the API key is determined to not exist or be invali
 ```
 
 ## /games/prices/v3
-This endpoint requires the following be sent to it via a HTTP `POST` header:
+This endpoint requires the following URL query parameters be sent via an HTTP `POST` header:
 ```json
 {"key": key}
 ```
 
-`key` is the ITAD API key. There are 2 relevant and optional parameters that can be added to this header:
+`key` is the ITAD API key. There are also 2 relevant and optional parameters that can be added to this header:
 
 - `capacity`: An integer representing the number of shops[^1] that ITAD should provide for each game.
 - `deals`: A boolean. `False` will return data for every game in the list regardless of if a deal for the game exists. `True` will only return data for games with deals.
 
-This endpoint *also requires* that the `json=` parameter of `#!python requests.post()` be given a list of ITAD game UUIDs.
+This endpoint *also requires* that the request body be given a list of ITAD game UUIDs. This is done by passing them into the `json=` parameter of `#!python requests.post()`.
 
 The endpoint returns JSON structured like the example below for each game returned. `capacity` was set to `1` in the example for brevity.
 ```json

@@ -18,18 +18,16 @@ If a registered command does not have an entry in `permissions.json` EnduraBot w
 
 To find the programmatic name for a command one may search the files in the `cogs` folder. Unless the entire file is dedicated to one command, generally, comments precede the code that registers a command.
 
-Lets take a look at the `/info` command.
+Lets take a look at the `/about` command.
 
-``` py title="user_cmds.py" hl_lines="6" linenums="36"
-# --- COMMAND: /info ---
+``` py title="user_cmds.py" hl_lines="6" linenums="90"
+# --- COMMAND: /about ---
 
-    @app_commands.command(name="info", description="Get information on a server member.")
+    @app_commands.command(name="about", description="Get information about EnduraBot.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-    async def info(self, interaction: discord.Interaction, user: discord.Member):
-
-    # Below is a bunch of lines of code for the command
+    async def about(self, interaction: discord.Interaction):
 ```
 
-In the above case the programmatic name for the command is `info`. It is the name of the declared asynchronus function (`#!python async def`) following the decorator registering a Discord application command (`#!python @app_commands.command()`).
+In the above case the programmatic name for the command is `about`. It is the name of the declared asynchronus function (`#!python async def`) following the decorator registering a Discord application command (`#!python @app_commands.command()`).
 

@@ -1,5 +1,7 @@
 site_name: EnduraBot Documentation
 site_url: http://127.0.0.1:8000/
+repo_url: https://github.com/sirdog9001/EnduraBot/
+repo_name: EnduraBot
 use_directory_urls: true
 
 theme:
@@ -54,7 +56,10 @@ markdown_extensions:
         - docs/includes/glossary.md
 nav:
   - Welcome: index.md
-  - Commands: commands.md
+  - Features & Commands:
+      - Commands: commands.md
+      - Listeners: listeners.md
+      - Tasks: tasks.md
   - Developers:
       - Getting Started: getting-started.md
       - Configuration: configuration.md
@@ -66,7 +71,7 @@ nav:
 watch:
   - docs/includes
 
-copyright: Text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 License</a> unless otherwise noted.
+copyright: All text is available under the <a href="https://github.com/sirdog9001/EnduraBot/blob/main/LICENSE.md">MIT license</a>.
 
 extra:
   generator: true
