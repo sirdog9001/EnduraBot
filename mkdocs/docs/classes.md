@@ -102,7 +102,7 @@ When initialization completes the following class attributes are made available:
 ### check_connection()
 This method accepts no arguements.
 
-This method checks if a connection to the API can be successfully made. If the API returns back with a `status_code` JSON object the method will raise a `KeyError`.
+This method checks if a connection to the API can be successfully made. If the API returns back a `status_code` JSON object the method will raise a `KeyError`.
 
 ### get_title()
 This method accepts no arguements.
@@ -153,12 +153,12 @@ When initialization completes the following class attributes are made available:
 ### get_deals_by_cut()
 This method accepts no arguement.
 
-This method returns the first 25 JSON objects give by `self.deals` sorted in order from games with the highest percentage off the price.
+This method returns the first 25 JSON objects given by `self.deals` sorted in order from games with the highest percentage off to lowest percentage off.
 
 ### get_deals_by_price()
 This method accepts no arguement.
 
-This method returns the first 25 JSON objects give by `self.deals` sorted in order from lowest deal price to highest deal price.
+This method returns the first 25 JSON objects given by `self.deals` sorted in order from lowest deal price to highest deal price.
 
 
 [^1]: The IsThereAnyDeal API calls a `shop` a provider of the game. Ergo, one shop might be `Steam`, another `GOG`, and so on.

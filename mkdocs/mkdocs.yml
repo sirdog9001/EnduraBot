@@ -60,6 +60,8 @@ nav:
       - Configuration: configuration.md
       - Permissions: permissions.md
       - Classes: classes.md
+      - External APIs:
+        - isthereanydeal-api.md
 
 watch:
   - docs/includes

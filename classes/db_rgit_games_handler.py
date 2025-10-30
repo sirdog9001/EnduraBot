@@ -18,7 +18,7 @@ class DBRGITGames():
         self.connection.commit()
 
     def check_if_exists(self, id):
-        
+
         self.cursor.execute(f"SELECT 1 FROM rgit_games WHERE rgit_games_itad_id = ?", (id,))
         data = self.cursor.fetchone()
 
@@ -31,7 +31,7 @@ class DBRGITGames():
 
         if not self.check_if_exists(game_id) == False:
             raise ValueError("Game already in table.")
-        
+
         self.cursor.execute("SELECT COUNT(*) from rgit_games")
         row_count = self.cursor.fetchone()
 
@@ -43,10 +43,10 @@ class DBRGITGames():
         self.connection.commit()
 
     def remove_game(self, game_id):
-        
+
         if self.check_if_exists(game_id) == False:
             raise ValueError("Game not in the table.")
-        
+
         self.cursor.execute(f"DELETE FROM rgit_games WHERE rgit_games_itad_id = ?", (game_id,))
         self.connection.commit()
 
@@ -55,14 +55,17 @@ class DBRGITGames():
         self.cursor.execute("SELECT rgit_games_title FROM rgit_games")
         games = [game[0] for game in self.cursor.execute("SELECT rgit_games_title FROM rgit_games")]
         return sorted(games)
-    
+
     def get_ids(self):
 
         self.cursor.execute("SELECT rgit_games_itad_id FROM rgit_games")
         ids = [id[0] for id in self.cursor.execute("SELECT rgit_games_itad_id FROM rgit_games")]
         return ids
-    
+
     def get_ids_and_names(self):
 
         self.cursor.execute("SELECT rgit_games_itad_id, rgit_games_title FROM rgit_games")
         return dict(self.cursor.fetchall())
+
+test = DBRGITGames()
+print(test.get_ids())
