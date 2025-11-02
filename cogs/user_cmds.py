@@ -11,12 +11,22 @@ import sys
 import logging
 import utils.config_loader as config_loader
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
-from utils.logging_setup import UNAUTHORIZED
+from utils.logging_setup import UNAUTHORIZED, COOLDOWN
 from utils.permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
 GUILD_ID = int(os.getenv('guild'))
+
+def wc_cooldown(interaction: discord.Interaction) -> app_commands.Cooldown | None:
+
+    cog_instance = interaction.client.get_cog('user_cmds')
+    work_corner_cooldown = cog_instance.work_corner_cooldown
+
+    if not interaction.user.voice or not interaction.user.voice.channel == cog_instance.work_corner_vc:
+        return False
+
+    return app_commands.Cooldown(1, work_corner_cooldown)
 
 class user_cmds(commands.Cog):
     def __init__(self, bot):
@@ -24,6 +34,8 @@ class user_cmds(commands.Cog):
         self.variables_file = {}
         self.settings_data = SETTINGS_DATA
         self.misc_data = MISC_DATA
+        self.work_corner_vc = self.bot.get_channel(self.settings_data.get("working_corner_vc_id"))
+        self.work_corner_cooldown = self.settings_data.get("wc_name_cooldown_in_seconds")
         self.settings_data_g = config_loader.SETTINGS_DATA
         self.misc_data_g = config_loader.MISC_DATA
 
@@ -85,7 +97,7 @@ class user_cmds(commands.Cog):
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info on {user.name} ({user.id}).")
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /user on {user.name} ({user.id}).")
 
     # --- COMMAND: /about ---
 
@@ -225,6 +237,37 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) sent a message as EnduraBot with content [{msg}].")
         await interaction.response.send_message("Message sent.", ephemeral=True)
         await interaction.channel.send(msg)
+
+
+# --- COMMAND: /wc-name ---
+
+    @app_commands.command(name="wc-name", description="Change the title of the Working Corner voice channel.")
+    @app_commands.check(check_permissions)
+    @app_commands.guilds(GUILD_ID)
+    @app_commands.checks.dynamic_cooldown(wc_cooldown, key=commands.BucketType.default)
+    async def wcname(self, interaction: discord.Interaction, title: str):
+
+        vc = self.bot.get_channel(self.settings_data.get("working_corner_vc_id"))
+
+        if not interaction.user.voice or not interaction.user.voice.channel == vc:
+            await interaction.response.send_message("You must be in the working corner VC to adjust it's title.", ephemeral=True)
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) attempted to edit the working corner VC without being in it.")
+            return
+
+        await vc.edit(name=title)
+        await interaction.response.send_message("Name changed.", ephemeral=True)
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) changed the name of working corner to [{title}].")
+
+    @wcname.error
+    async def rgitdeals_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            minutes, seconds = divmod(int(error.retry_after), 60)
+            if minutes > 0:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {minutes} minute(s) and {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the WC-NAME cooldown with {minutes} minute(s) and {seconds} second(s) remaining.")
+            else:
+                await interaction.response.send_message(f"This command is on cooldown. Try again in {seconds} second(s).", ephemeral=True)
+                logger.log(COOLDOWN, f"{interaction.user.name} ({interaction.user.id}) hit the WC-NAME cooldown with {seconds} second(s) remaining.")
 
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
