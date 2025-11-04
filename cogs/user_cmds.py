@@ -85,7 +85,7 @@ class user_cmds(commands.Cog):
             embed.add_field(name="Roles", value=' | '.join(role_ids), inline=False)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /info on {user.name} ({user.id}).")
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) ran /user on {user.name} ({user.id}).")
 
     # --- COMMAND: /about ---
 
