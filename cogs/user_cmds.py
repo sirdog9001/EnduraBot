@@ -4,19 +4,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import discord
+import datetime
+from datetime import timedelta
 from discord.ext import commands
-from discord import app_commands
 from discord import app_commands, AllowedMentions
 import sys
 import logging
 import utils.config_loader as config_loader
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
-from utils.logging_setup import UNAUTHORIZED
+from classes.db_takeL_handler import DBTakeL
 from utils.permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
 
 GUILD_ID = int(os.getenv('guild'))
+
+take_l_db = DBTakeL()
 
 class user_cmds(commands.Cog):
     def __init__(self, bot):
@@ -225,6 +228,65 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) sent a message as EnduraBot with content [{msg}].")
         await interaction.response.send_message("Message sent.", ephemeral=True)
         await interaction.channel.send(msg)
+
+# --- COMMAND: /takeL ---
+
+    @app_commands.command(name="takel", description="Give a user the L role for specified duration.")
+    @app_commands.check(check_permissions)
+    @app_commands.guilds(GUILD_ID)
+    async def takel(self, interaction: discord.Interaction, target: discord.Member, length: int = 24, check: bool = False):
+
+        guild_l_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("l_role_id"))
+        timestamp_equation = datetime.datetime.now() + timedelta(minutes=length)
+        timestamp = timestamp_equation.replace(microsecond=0)
+        timestamp_fancy = timestamp.strftime("%B %d, %Y %H:%M")
+        epoch = round(timestamp_equation.timestamp())
+
+        if check == True:
+            if take_l_db.check_status(target.id) == False:
+                await interaction.response.send_message(f"<@{target.id}> does not have the L.", ephemeral=True)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has the L. [FALSE]")
+                return
+            else:
+                timestamp = take_l_db.check_time(target.id)
+                mod_id =  take_l_db.get_mod(target.id)
+                await interaction.response.send_message(f"<@{mod_id}> gave the L to <@{target.id}>. It is set to be removed <t:{timestamp}:f> (<t:{timestamp}:R>)", ephemeral=True)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has the L. [TRUE]")
+                return
+
+        if length <= 0:
+            await interaction.response.send_message("Hilarious.", ephemeral=True)
+            return
+
+        take_l_db.add_user(target.id, target.name, interaction.user.id, interaction.user.name, timestamp)
+
+        if not guild_l_role in target.roles:
+            await target.add_roles(guild_l_role)
+
+        if target.voice:
+            await target.move_to(None)
+
+        embed_executor = discord.Embed(
+            title=":regional_indicator_l: Action successful.",
+            description=f"<@{target.id}> given the L. **Please read the information below carefully**. \n\n- If you would likely to remove the L early, simply remove the role using any available method. It will be handled gracefully.\n- If you want to *give the L back* after *already* removing it early, again, simply use any available method. The original scheduled removal time will stand.\n- If you want to *change when the scheduled removal* is, run the command again. Be aware this will attempt to send another DM to <@{target.id}>.\n\n If the notification sent field below is :x: then attempting to DM them failed — likely due to their settings. You will need to notify them manually.",
+            color=3800852)
+        embed_executor.add_field(name="Automatic Removal Time", value=f"<t:{epoch}:f> (<t:{epoch}:R>)", inline=False)
+
+        try:
+            embed_notification = discord.Embed(
+            title="You have been given the L.",
+            description=f"<@{interaction.user.id}> has given you the L role in the Endurance Coalition.\n\n If you were in a VC when they performed this action you may have experienced being disconnected suddenly; this is done to ensure that the restrictions that come with the role apply immediately.\n\n The date and time below is when the role will be removed automatically. It is at the discretion of staff as to whether it is removed early.",
+            color=15277667)
+            embed_notification.add_field(name="Automatic Removal Time", value=f"<t:{epoch}:f> (<t:{epoch}:R>)", inline=False)
+
+            await target.send(embed=embed_notification)
+            noti_success = ":white_check_mark:"
+        except discord.Forbidden:
+            noti_success = ":x:"
+
+        logger.info(f"{interaction.user.name} ({interaction.user.id}) gave the L to {target.name} ({target.id}) for {length} hour(s). Removal scheduled for {timestamp_fancy}.")
+        embed_executor.add_field(name="Notification Sent?", value=noti_success, inline=False)
+        await interaction.response.send_message(embed=embed_executor, ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
