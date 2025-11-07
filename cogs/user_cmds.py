@@ -237,7 +237,7 @@ class user_cmds(commands.Cog):
     async def takel(self, interaction: discord.Interaction, target: discord.Member, length: int = 24, check: bool = False):
 
         guild_l_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("l_role_id"))
-        timestamp_equation = datetime.datetime.now() + timedelta(minutes=length)
+        timestamp_equation = datetime.datetime.now() + timedelta(hours=length)
         timestamp = timestamp_equation.replace(microsecond=0)
         timestamp_fancy = timestamp.strftime("%B %d, %Y %H:%M")
         epoch = round(timestamp_equation.timestamp())
