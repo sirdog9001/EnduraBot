@@ -268,7 +268,7 @@ class user_cmds(commands.Cog):
 
         embed_executor = discord.Embed(
             title=":regional_indicator_l: Action successful.",
-            description=f"<@{target.id}> given the L. **Please read the information below carefully**. \n\n- If you would likely to remove the L early, simply remove the role using any available method. It will be handled gracefully.\n- If you want to *give the L back* after *already* removing it early, again, simply use any available method. The original scheduled removal time will stand.\n- If you want to *change when the scheduled removal* is, run the command again. Be aware this will attempt to send another DM to <@{target.id}>.\n\n If the notification sent field below is :x: then attempting to DM them failed — likely due to their settings. You will need to notify them manually.",
+            description=f"<@{target.id}> given the L. **Please read the information below carefully**. \n\n- If you would like to remove the L early, simply remove the role using any available method. It will be handled gracefully.\n- If you want to *give the L back* after *already* removing it early, again, simply use any available method. The original scheduled removal time will stand.\n- If you want to *change when the scheduled removal is*, run the command again. Be aware this will attempt to send another DM to <@{target.id}>.\n\n If the notification sent field below is :x: then attempting to DM them failed — likely due to their settings. You will need to notify them manually.",
             color=3800852)
         embed_executor.add_field(name="Automatic Removal Time", value=f"<t:{epoch}:f> (<t:{epoch}:R>)", inline=False)
 
