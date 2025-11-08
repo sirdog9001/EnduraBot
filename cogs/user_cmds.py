@@ -13,6 +13,7 @@ import logging
 import utils.config_loader as config_loader
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
 from classes.db_takeL_handler import DBTakeL
+from utils.logging_setup import UNAUTHORIZED
 from utils.permissions_checker import check_permissions
 
 logger = logging.getLogger('endurabot.' + __name__)
@@ -253,6 +254,11 @@ class user_cmds(commands.Cog):
                 await interaction.response.send_message(f"<@{mod_id}> gave the L to <@{target.id}>. It is set to be removed <t:{timestamp}:f> (<t:{timestamp}:R>)", ephemeral=True)
                 logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has the L. [TRUE]")
                 return
+
+        if target.bot:
+            await interaction.response.send_message("Bots may not be given the L.", ephemeral=True) 
+            logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) tried to give the L to bot {target.name} ({target.id}).")
+            return
 
         if length <= 0:
             await interaction.response.send_message("Hilarious.", ephemeral=True)
