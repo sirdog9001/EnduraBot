@@ -44,6 +44,10 @@ class blacklist(commands.Cog):
     app_commands.Choice(name="Add User",value="add"),
     app_commands.Choice(name="Remove User",value="remove")
 ])
+    @app_commands.describe(
+        options = "Add or remove user from the blacklist.",
+        user = "Member to blacklist."
+    )
     @app_commands.guilds(GUILD_ID)
     async def blacklist(self, interaction: discord.Interaction, options: app_commands.Choice[str], user: discord.Member):
 

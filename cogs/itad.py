@@ -143,6 +143,10 @@ class itad(commands.Cog):
     app_commands.Choice(name="Add Game",value="add"),
     app_commands.Choice(name="Remove Game",value="remove")
 ])
+    @app_commands.describe(
+        options = "Add or remove game from RGIT table.",
+        title = "Title of game to add/remove."
+    )
     @app_commands.guilds(GUILD_ID)
     async def rgitedit(self, interaction: discord.Interaction, options: app_commands.Choice[str], title: str):
 

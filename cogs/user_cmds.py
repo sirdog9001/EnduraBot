@@ -44,6 +44,9 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="user", description="Get information on a server member.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.describe(
+        user = "Member to get information on."
+    )
     async def user(self, interaction: discord.Interaction, user: discord.Member):
 
         create_epoch = round(user.created_at.timestamp()) #Get UNIX timestamp for when the member's account was created.
@@ -121,7 +124,9 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-
+    @app_commands.describe(
+        desc = "A brief description of the issue. Operators will see this."
+    )
     async def alert(self, interaction: discord.Interaction, desc: str):
 
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
@@ -164,6 +169,9 @@ class user_cmds(commands.Cog):
         app_commands.Choice(name="Links",value="links"),
         app_commands.Choice(name="IP Addresses / Ports",value="ports")
 ])
+    @app_commands.describe(
+        options = "What information do you want?"
+    )   
     async def info(self, interaction: discord.Interaction, options: app_commands.Choice[str]):
 
         if options.value == "links":
@@ -237,6 +245,11 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="takel", description="Give a user the L role for specified duration.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.describe(
+        target = "Who gets the L?",
+        length = "Length, in hours, the L should last for. (default: 24)",
+        check = "If true, will be told if there's an active timer for the target. Nothing else will happen."
+    )  
     async def takel(self, interaction: discord.Interaction, target: discord.Member, length: int = 24, check: bool = False):
 
         guild_l_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("l_role_id"))
