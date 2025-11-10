@@ -171,7 +171,7 @@ class user_cmds(commands.Cog):
 ])
     @app_commands.describe(
         options = "What information do you want?"
-    )   
+    )
     async def info(self, interaction: discord.Interaction, options: app_commands.Choice[str]):
 
         if options.value == "links":
@@ -249,7 +249,7 @@ class user_cmds(commands.Cog):
         target = "Who gets the L?",
         length = "Length, in hours, the L should last for. (default: 24)",
         check = "If true, will be told if there's an active timer for the target. Nothing else will happen."
-    )  
+    )
     async def takel(self, interaction: discord.Interaction, target: discord.Member, length: int = 24, check: bool = False):
 
         guild_l_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("l_role_id"))
@@ -271,7 +271,7 @@ class user_cmds(commands.Cog):
                 return
 
         if target.bot:
-            await interaction.response.send_message("Bots may not be given the L.", ephemeral=True) 
+            await interaction.response.send_message("Bots may not be given the L.", ephemeral=True)
             logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) tried to give the L to bot {target.name} ({target.id}).")
             return
 
@@ -334,25 +334,25 @@ class user_cmds(commands.Cog):
 
         if action.value == "add":
 
-            if monitor_db.check_status(int(disc_id)) == True:
+            if monitor_db.check_status(disc_id) == True:
                 await interaction.response.send_message("Discord ID is already being monitored.", ephemeral=True)
-                logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to add {monitor_db.get_name(int(disc_id))} ({disc_id}) when they are already being monitored.")
+                logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to add {monitor_db.get_name(disc_id)} ({disc_id}) when they are already being monitored.")
                 return
-            
+
             monitor_db.add_user(target_disc_id=disc_id, target_name=name, target_steam_id=steam_id, mod_name=f"{interaction.user.name}", mod_disc_id=f"{interaction.user.id}", reason=reason, level=level.value)
             await interaction.response.send_message("Entry successfully added.", ephemeral=True)
             logger.info(f"{interaction.user.name} ({interaction.user.id}) added {name} (Discord: {disc_id} | Steam: {steam_id}) for monitoring at level [{level.value.upper()}]. Reason: [{reason}]")
             return
-        
+
         if action.value == "remove":
-            if monitor_db.check_status(int(disc_id)) == False:
+            if monitor_db.check_status(disc_id) == False:
                 await interaction.response.send_message("Discord ID is already not being monitored.", ephemeral=True)
                 logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to remove {disc_id} from monitoring but the ID wasn't found.")
                 return
-            
+
             await interaction.response.send_message("Entry successfully removed.", ephemeral=True)
-            logger.info(f"{interaction.user.name} ({interaction.user.id}) removed {monitor_db.get_name(int(disc_id))} ({disc_id}) from monitoring.")
-            monitor_db.remove_user(int(disc_id))
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) removed {monitor_db.get_name(disc_id)} ({disc_id}) from monitoring.")
+            monitor_db.remove_user(disc_id)
             return
 
 async def setup(bot):
