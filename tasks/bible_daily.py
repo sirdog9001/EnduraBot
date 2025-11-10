@@ -72,9 +72,7 @@ class bible_daily(commands.Cog):
 
     @daily_bible_quote.before_loop
     async def before_daily_bible_quote(self):
-        logger.info("Waiting for bot to be ready before starting daily bible quote loop...")
         await self.bot.wait_until_ready()
-        logger.info("Bot ready, starting daily bible quote loop.")
 
 async def setup(bot):
     await bot.add_cog(bible_daily(bot))
