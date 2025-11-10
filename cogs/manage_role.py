@@ -29,18 +29,21 @@ class manage_role(commands.Cog):
 
 
     # --- COMMAND: /editrole ---
-
+    role_list = SETTINGS_DATA["mod_editable_roles"]
+    options_list = []
+    for role_name, role_id in role_list.items():
+        #Because role ID numbers are so long, it's interpreted as being too big an integer and causes Discord to crash spectacularly. 
+        #So need to make it a string using an f-string.
+        options_list.append(app_commands.Choice(name=role_name,value=f"{role_id}"))
 
     @app_commands.command(name="editrole", description="Give or revoke roles.")
     @app_commands.check(check_permissions)
+    @app_commands.choices(options=options_list)
     @app_commands.guilds(GUILD_ID)
-    async def editrole(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role, ping: bool = False):
+    async def editrole(self, interaction: discord.Interaction, user: discord.Member, options: app_commands.Choice[str], ping: bool = False):
 
-        # If the role is not editable, reject.
-        if role.id not in self.settings_data.get("mod_editable_roles").values():
-            await interaction.response.send_message(f"{role.mention} is not on the approved list of editable roles.", ephemeral=True)
-            logger.log(UNAUTHORIZED, f"Staff member {interaction.user.name} ({interaction.user.id}) attempted to manipulate non-editable role @{role.name} ({role.id}) for {user.name} ({user.id}).")
-            return
+        # And now we make it an integer for the "get_role" method.
+        role = interaction.guild.get_role(int(options.value))
 
         # Change roles.
         if role in user.roles:

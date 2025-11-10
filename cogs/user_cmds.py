@@ -13,6 +13,7 @@ import logging
 import utils.config_loader as config_loader
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
 from classes.db_takeL_handler import DBTakeL
+from classes.db_monitor_handler import DBMonitor
 from utils.logging_setup import UNAUTHORIZED
 from utils.permissions_checker import check_permissions
 
@@ -21,6 +22,7 @@ logger = logging.getLogger('endurabot.' + __name__)
 GUILD_ID = int(os.getenv('guild'))
 
 take_l_db = DBTakeL()
+monitor_db = DBMonitor()
 
 class user_cmds(commands.Cog):
     def __init__(self, bot):
@@ -42,6 +44,9 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="user", description="Get information on a server member.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.describe(
+        user = "Member to get information on."
+    )
     async def user(self, interaction: discord.Interaction, user: discord.Member):
 
         create_epoch = round(user.created_at.timestamp()) #Get UNIX timestamp for when the member's account was created.
@@ -119,7 +124,9 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="alert", description="Submit a pinged alert to systems operators of a service being down.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
-
+    @app_commands.describe(
+        desc = "A brief description of the issue. Operators will see this."
+    )
     async def alert(self, interaction: discord.Interaction, desc: str):
 
         guild_alert_channel = self.bot.get_channel(self.settings_data.get("alert_channel_id"))
@@ -162,6 +169,9 @@ class user_cmds(commands.Cog):
         app_commands.Choice(name="Links",value="links"),
         app_commands.Choice(name="IP Addresses / Ports",value="ports")
 ])
+    @app_commands.describe(
+        options = "What information do you want?"
+    )   
     async def info(self, interaction: discord.Interaction, options: app_commands.Choice[str]):
 
         if options.value == "links":
@@ -235,6 +245,11 @@ class user_cmds(commands.Cog):
     @app_commands.command(name="takel", description="Give a user the L role for specified duration.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.describe(
+        target = "Who gets the L?",
+        length = "Length, in hours, the L should last for. (default: 24)",
+        check = "If true, will be told if there's an active timer for the target. Nothing else will happen."
+    )  
     async def takel(self, interaction: discord.Interaction, target: discord.Member, length: int = 24, check: bool = False):
 
         guild_l_role = discord.utils.get(interaction.guild.roles, id=self.settings_data.get("l_role_id"))
@@ -293,6 +308,52 @@ class user_cmds(commands.Cog):
         logger.info(f"{interaction.user.name} ({interaction.user.id}) gave the L to {target.name} ({target.id}) for {length} hour(s). Removal scheduled for {timestamp_fancy}.")
         embed_executor.add_field(name="Notification Sent?", value=noti_success, inline=False)
         await interaction.response.send_message(embed=embed_executor, ephemeral=True)
+
+# --- COMMAND: /monitor ---
+
+    @app_commands.command(name="monitor", description="Add someone to be monitored on join.")
+    @app_commands.check(check_permissions)
+    @app_commands.guilds(GUILD_ID)
+    @app_commands.choices(level = [
+        app_commands.Choice(name="Ban and Send Alert",value="ban"),
+        app_commands.Choice(name="Send Alert Only",value="alert")
+])
+    @app_commands.choices(action = [
+        app_commands.Choice(name="Add",value="add"),
+        app_commands.Choice(name="Remove",value="remove")
+])
+    @app_commands.describe(
+        disc_id = "The Discord ID of the person to monitor for.",
+        action = "What is being done?",
+        level = "What should happen if the person joins?",
+        name = "The common name of the person.",
+        steam_id = "The STEAM ID of the person.",
+        reason = "Why is the person being monitored?"
+    )
+    async def monitor(self, interaction: discord.Interaction, disc_id: str, action: app_commands.Choice[str], level: app_commands.Choice[str] = None, name: str = None, steam_id: str = None, reason: str = None):
+
+        if action.value == "add":
+
+            if monitor_db.check_status(int(disc_id)) == True:
+                await interaction.response.send_message("Discord ID is already being monitored.", ephemeral=True)
+                logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to add {monitor_db.get_name(int(disc_id))} ({disc_id}) when they are already being monitored.")
+                return
+            
+            monitor_db.add_user(target_disc_id=disc_id, target_name=name, target_steam_id=steam_id, mod_name=f"{interaction.user.name}", mod_disc_id=f"{interaction.user.id}", reason=reason, level=level.value)
+            await interaction.response.send_message("Entry successfully added.", ephemeral=True)
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) added {name} (Discord: {disc_id} | Steam: {steam_id}) for monitoring at level [{level.value.upper()}]. Reason: [{reason}]")
+            return
+        
+        if action.value == "remove":
+            if monitor_db.check_status(int(disc_id)) == False:
+                await interaction.response.send_message("Discord ID is already not being monitored.", ephemeral=True)
+                logger.error(f"{interaction.user.name} ({interaction.user.id}) attempted to remove {disc_id} from monitoring but the ID wasn't found.")
+                return
+            
+            await interaction.response.send_message("Entry successfully removed.", ephemeral=True)
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) removed {monitor_db.get_name(int(disc_id))} ({disc_id}) from monitoring.")
+            monitor_db.remove_user(int(disc_id))
+            return
 
 async def setup(bot):
     await bot.add_cog(user_cmds(bot))
