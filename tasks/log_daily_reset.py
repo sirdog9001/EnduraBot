@@ -22,7 +22,7 @@ class log_daily_reset(commands.Cog):
         await self.bot.wait_until_ready()
 
         now = datetime.datetime.now()
-        boot_message = f"\n--- {now.strftime('%A, %B %d, %Y (%Y%m%d)')} | {now.strftime('%H:%M')} ---"
+        boot_message = f"--- {now.strftime('%A, %B %d, %Y (%Y%m%d)')} | {now.strftime('%H:%M')} ---"
         logger.log(BOOT, boot_message)
     
     @log_daily_reset_func.before_loop
