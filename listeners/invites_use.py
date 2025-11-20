@@ -37,12 +37,12 @@ class invites_use(commands.Cog):
 
                 embed = discord.Embed(
                     title=":incoming_envelope: User has joined.",
-                    description=f"<@{member.id}> has joined. :tada:",
                     color=3800852
                 )
+                embed.add_field(name="Joining User", value=f"<@{member.id}> ({member.name} | {member.id})", inline=False)
                 embed.add_field(name="Invite Code", value=f"``{invite.code}``", inline=False)
                 embed.add_field(name="Invite Creator", value=f"<@{invite.inviter.id}> ({invite.inviter} | {invite.inviter.id})", inline=False)
-                embed.add_field(name="Invite Creation Date", value=f"<t:{round(invite.created_at.timestamp())}:f>", inline=False)
+                embed.add_field(name="Invite Creation Date", value=f"<t:{round(invite.created_at.timestamp())}:f> (<t:{round(invite.created_at.timestamp())}:R>)", inline=False)
 
                 await invite_alert_channel.send(embed=embed)
 
