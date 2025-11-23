@@ -14,6 +14,9 @@ import logging
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
 from utils.logging_setup import COOLDOWN, UNAUTHORIZED
 from utils.permissions_checker import check_permissions
+from classes.db_rquote_used_handler import RquoteUsed
+
+dupe_blocker = RquoteUsed()
 
 logger = logging.getLogger('endurabot.' + __name__)
 
@@ -83,9 +86,14 @@ class rquote(commands.Cog):
                     re.search(r'''["](.+?)["]''', msg.content)
                 ))
             )
+            and (
+                dupe_blocker.check_status(f"{msg.id}") == False
+            )
         ]
 
         selected_msg = random.choice(msg_table)
+
+        dupe_blocker.add_msg(f"{selected_msg.id}")
 
         all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
         extracted_quote = '"\n"'.join(match.strip() for match in all_matches)

@@ -5,6 +5,9 @@ import logging
 import random
 import re
 from utils.config_loader import SETTINGS_DATA, MISC_DATA
+from classes.db_rquote_used_handler import RquoteUsed
+
+dupe_blocker = RquoteUsed()
 
 logger = logging.getLogger('endurabot.' + __name__)
 
@@ -42,17 +45,16 @@ class bible_daily(commands.Cog):
                     re.search(r'''["](.+?)["]''', msg.content)
                 ))
             )
+            and (
+                dupe_blocker.check_status(f"{msg.id}") == False
+            )
         ]
 
-        # If a situation were to ever somehow occur where msg_table comes empty, use a pre-selected message to keep things moving.
-        if not msg_table:
-            selected_msg = await ooc_channel.fetch_message(1426039544490229811)
-            logger.error("msg_table interpreted as empty. Fallback message engaged.")
-        else:       
-            selected_msg = random.choice(msg_table)
+        selected_msg = random.choice(msg_table)
+
+        dupe_blocker.add_msg(f"{selected_msg.id}")
 
         all_matches = re.findall(r'''["](.+?)["]''', selected_msg.content)
-        
         extracted_quote = '"\n"'.join(match.strip() for match in all_matches)
         formatted_quote = f'"{extracted_quote}"'
 
