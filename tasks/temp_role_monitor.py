@@ -4,12 +4,12 @@ import datetime
 from datetime import datetime
 from discord.ext import tasks, commands
 import logging
-from classes.db_takeL_handler import DBTakeL
+from classes.db_trole_handler import DBTempRole
 from utils.config_loader import SETTINGS_DATA
 
 logger = logging.getLogger("endurabot." + __name__)
 
-take_l_db = DBTakeL()
+temp_role = DBTempRole()
 
 GUILD_ID = int(os.getenv("guild"))
 
@@ -27,25 +27,25 @@ class take_l_monitor(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_length_minutely(self):
 
-        timestamps = take_l_db.get_timestamps()
+        timestamps = temp_role.get_timestamps()
 
         for timestamp in timestamps:
             if datetime.now() > timestamp:
                 user = self.guild.get_member(
-                    take_l_db.get_user_id_by_timestamp(timestamp)
+                    int(temp_role.get_user_id_by_timestamp(timestamp))
                 )
-                role = self.guild.get_role(self.settings_data.get("l_role_id"))
+                role = self.guild.get_role(int(temp_role.get_role_by_timestamp(timestamp)))
                 if role in user.roles:
                     await user.remove_roles(role)
                     logger.info(
-                        f"{take_l_db.get_user_name_by_timestamp(timestamp)} ({take_l_db.get_user_id_by_timestamp(timestamp)}) was given the L and it's duration has ended. Role removed and L-status removed from database."
+                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [{role.name}] temporarily and the duration has ended. Role removed and status removed from database."
                     )
-                    take_l_db.remove_user_by_timestamp(timestamp)
+                    temp_role.remove_user_by_timestamp(timestamp)
                 else:
                     logger.info(
-                        f"{take_l_db.get_user_name_by_timestamp(timestamp)} ({take_l_db.get_user_id_by_timestamp(timestamp)}) was given the L and it's duration has ended. Role detected to have been removed early. Removed L-status from database."
+                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [{role.name}] temporarily and the duration has ended. Role detected to have been removed early. Removed status from database."
                     )
-                    take_l_db.remove_user_by_timestamp(timestamp)
+                    temp_role.remove_user_by_timestamp(timestamp)
 
     @check_length_minutely.before_loop
     async def before_daily_bible_quote(self):
