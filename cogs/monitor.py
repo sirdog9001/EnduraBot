@@ -65,7 +65,7 @@ class monitor(commands.Cog):
 
             monitor_db.add_user(target_disc_id=disc_id, target_name=name, target_steam_id=steam_id, mod_name=f"{interaction.user.name}", mod_disc_id=f"{interaction.user.id}", reason=reason, level=level.value)
             await interaction.response.send_message("Entry successfully added.", ephemeral=True)
-            logger.info(f"{interaction.user.name} ({interaction.user.id}) added {name} (Discord: {disc_id} | Steam: {steam_id}) for monitoring at level [{level.value.upper()}]. Reason: [{reason}]")
+            logger.info(f"{interaction.user.name} ({interaction.user.id}) added {name} (Discord: {disc_id} | Steam: {steam_id}) for monitoring at level [{level.value.upper()}].")
             return
 
         if action.value == "remove":
