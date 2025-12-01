@@ -31,8 +31,8 @@ class DBTempRole:
             return False
 
     def add_user(self, target_id, target_name, mod_id, mod_name, role_id, timestamp):
-        if self.check_status(target_id) == True:
-            self.remove_user_by_id(target_id)
+        if self.check_status(str(target_id)) == True:
+            self.remove_user_by_id(str(target_id))
 
         self.cursor.execute(
             f"INSERT INTO temp_roles(temp_roles_disc_id, temp_roles_name, temp_roles_mod_disc_id, temp_roles_mod_name, temp_roles_role_id, temp_roles_timestamp) VALUES (?, ?, ?, ?, ?, ?)",

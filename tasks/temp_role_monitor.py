@@ -38,12 +38,12 @@ class take_l_monitor(commands.Cog):
                 if role in user.roles:
                     await user.remove_roles(role)
                     logger.info(
-                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [{role.name}] temporarily and the duration has ended. Role removed and status removed from database."
+                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [@{role.name}] temporarily and the duration has ended. Role removed and status removed from database."
                     )
                     temp_role.remove_user_by_timestamp(timestamp)
                 else:
                     logger.info(
-                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [{role.name}] temporarily and the duration has ended. Role detected to have been removed early. Removed status from database."
+                        f"{temp_role.get_user_name_by_timestamp(timestamp)} ({temp_role.get_user_id_by_timestamp(timestamp)}) was given [@{role.name}] temporarily and the duration has ended. Role detected to have been removed early. Removed status from database."
                     )
                     temp_role.remove_user_by_timestamp(timestamp)
 

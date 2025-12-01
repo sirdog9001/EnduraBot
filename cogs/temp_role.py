@@ -51,9 +51,12 @@ class temp_role(commands.Cog):
         target = "Who is the target?",
         length = "Length, in hours, the L should last for. (default: 24)",
         roles = f"Which role should be given to the target? (default: {options_list[0].name})",
-        check = "If true, will be told if there's an active timer for the target. Nothing else will happen."
+        check = "If true, will ONLY be told if there's an active timer for the target.",
+        remove = "If true, will ONLY remove the temp role and delete timer for target."
     )
-    async def trole(self, interaction: discord.Interaction, target: discord.Member, roles: str = options_list[0].value, length: int = 24, check: bool = False):
+    async def trole(self, interaction: discord.Interaction, target: discord.Member, roles: str = options_list[0].value, length: int = 24, check: bool = False, remove: bool = False):
+
+        await interaction.response.defer(ephemeral=True)
 
         role = interaction.guild.get_role(int(roles))
         timestamp_equation = datetime.datetime.now() + timedelta(minutes=length)
@@ -62,31 +65,57 @@ class temp_role(commands.Cog):
         epoch = round(timestamp_equation.timestamp())
 
         if check == True:
-            if db_temp_role.check_status(target.id) == False:
-                await interaction.response.send_message(f"<@{target.id}> does not have a temporary role.", ephemeral=True)
+            if db_temp_role.check_status(str(target.id)) == False:
+                await interaction.followup.send(f"<@{target.id}> does not have a temporary role.", ephemeral=True)
                 logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has a temporary role. [FALSE]")
                 return
             else:
-                timestamp = db_temp_role.check_time(target.id)
-                mod_id =  db_temp_role.get_mod(target.id)
-                role_id = db_temp_role.get_role(target.id)
-                await interaction.response.send_message(f"<@{mod_id}> gave <@&{role_id}> to <@{target.id}>. It is set to be removed <t:{timestamp}:f> (<t:{timestamp}:R>)", ephemeral=True)
-                logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has a temporary role. [TRUE][@{role.name}]")
+                timestamp = db_temp_role.check_time(str(target.id))
+                mod_id =  db_temp_role.get_mod(str(target.id))
+                role_id = db_temp_role.get_role(str(target.id))
+                role_name = interaction.guild.get_role(int(role_id)).name
+                await interaction.followup.send(f"<@{mod_id}> gave <@&{role_id}> to <@{target.id}>. It is set to be removed <t:{timestamp}:f> (<t:{timestamp}:R>)", ephemeral=True)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has a temporary role. [TRUE] [@{role_name}]")
+                return
+            
+        if remove == True:
+            if db_temp_role.check_status(str(target.id)) == False:
+                await interaction.followup.send(f"<@{target.id}> does not have a temporary role.", ephemeral=True)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) attempted to remove a temporary role from {target.name} ({target.id}) when they did not have one.")
+                return
+            else:
+                role_to_remove = interaction.guild.get_role(int(db_temp_role.get_role(str(target.id))))
+                role_name = role_to_remove.name
+                await target.remove_roles(role_to_remove)
+                await interaction.followup.send(f"<@{target.id}>'s temporary role successfully removed.", ephemeral=True)
+                logger.info(f"{interaction.user.name} ({interaction.user.id}) removed the temporary role [@{role_name}] for {target.name} ({target.id}) early.")
+                db_temp_role.remove_user_by_id(str(target.id))
                 return
 
         if target.bot:
-            await interaction.response.send_message("Bots may not be given a temporary role.", ephemeral=True)
+            await interaction.followup.send("Bots may not be given a temporary role.", ephemeral=True)
             logger.log(UNAUTHORIZED, f"{interaction.user.name} ({interaction.user.id}) tried to give a temporary role to bot {target.name} ({target.id}).")
             return
 
         if length <= 0:
-            await interaction.response.send_message("Hilarious.", ephemeral=True)
+            await interaction.followup.send("Hilarious.", ephemeral=True)
             return
+        
+        if db_temp_role.check_status(str(target.id)) == True:
+            
+            db_role = interaction.guild.get_role(int(db_temp_role.get_role(str(target.id))))
+            new_role = role
+            
+            if not new_role in target.roles:
+                await target.remove_roles(db_role)
+                await target.add_roles(new_role)
+
+        else:
+            
+            await target.add_roles(role)
+
 
         db_temp_role.add_user(target.id, target.name, interaction.user.id, interaction.user.name, roles, timestamp)
-
-        if not role in target.roles:
-            await target.add_roles(role)
 
         if target.voice:
             await target.move_to(None)
@@ -111,7 +140,7 @@ class temp_role(commands.Cog):
 
         logger.info(f"{interaction.user.name} ({interaction.user.id}) gave [@{role.name}] to {target.name} ({target.id}) for {length} hour(s). Removal scheduled for {timestamp_fancy}.")
         embed_executor.add_field(name="Notification Sent?", value=noti_success, inline=False)
-        await interaction.response.send_message(embed=embed_executor, ephemeral=True)
+        await interaction.followup.send(embed=embed_executor, ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(temp_role(bot))
