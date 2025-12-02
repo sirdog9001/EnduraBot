@@ -49,12 +49,13 @@ class temp_role(commands.Cog):
     @app_commands.choices(roles=options_list)
     @app_commands.describe(
         target = "Who is the target?",
-        length = "Length, in hours, the L should last for. (default: 24)",
+        length = "Length, in hours, the role should last for. (default: 24)",
         roles = f"Which role should be given to the target? (default: {options_list[0].name})",
+        disconnect = "Should the target be disconnected from VC? (default: True)",
         check = "If true, will ONLY be told if there's an active timer for the target.",
         remove = "If true, will ONLY remove the temp role and delete timer for target."
     )
-    async def trole(self, interaction: discord.Interaction, target: discord.Member, roles: str = options_list[0].value, length: int = 24, check: bool = False, remove: bool = False):
+    async def trole(self, interaction: discord.Interaction, target: discord.Member, roles: str = options_list[0].value, length: int = 24, check: bool = False, remove: bool = False, disconnect: bool = True):
 
         await interaction.response.defer(ephemeral=True)
 
@@ -78,7 +79,7 @@ class temp_role(commands.Cog):
                 await interaction.followup.send(f"<@{mod_id}> gave <@&{role_id}> to <@{target.id}>. It is set to be removed <t:{timestamp}:f> (<t:{timestamp}:R>)", ephemeral=True)
                 logger.info(f"{interaction.user.name} ({interaction.user.id}) checked if {target.name} ({target.id}) has a temporary role. [TRUE] [@{role_name}]")
                 return
-            
+
         if remove == True:
             if db_temp_role.check_status(str(target.id)) == False:
                 await interaction.followup.send(f"<@{target.id}> does not have a temporary role.", ephemeral=True)
@@ -101,23 +102,23 @@ class temp_role(commands.Cog):
         if length <= 0:
             await interaction.followup.send("Hilarious.", ephemeral=True)
             return
-        
+
         if db_temp_role.check_status(str(target.id)) == True:
-            
+
             db_role = interaction.guild.get_role(int(db_temp_role.get_role(str(target.id))))
             new_role = role
-            
+
             if not new_role in target.roles:
                 await target.remove_roles(db_role)
                 await target.add_roles(new_role)
 
         else:
-            
+
             await target.add_roles(role)
 
         db_temp_role.add_user(target.id, target.name, interaction.user.id, interaction.user.name, roles, timestamp)
 
-        if target.voice:
+        if target.voice and disconnect == True:
             await target.move_to(None)
 
         embed_executor = discord.Embed(
@@ -130,7 +131,7 @@ class temp_role(commands.Cog):
         description=f"<@{interaction.user.id}> has given you the role `@{role.name}`.\n\n The date and time below is when the role will be removed automatically. Note that the removal time may be off by upto 2-5 minutes.",
         color=15277667)
         embed_notification_public.add_field(name="Automatic Removal Time", value=f"<t:{epoch}:f> (<t:{epoch}:R>)", inline=False)
-        
+
         await general_chat.send(embed=embed_notification_public, content=f"<@{target.id}>", allowed_mentions=self.default_allowed_mentions)
 
         logger.info(f"{interaction.user.name} ({interaction.user.id}) gave [@{role.name}] to {target.name} ({target.id}) for {length} hour(s). Removal scheduled for {timestamp_fancy}.")
