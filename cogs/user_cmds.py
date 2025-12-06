@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import discord
-import datetime
+import re
 from datetime import timedelta
 from discord.ext import commands
 from discord import app_commands, AllowedMentions
@@ -248,10 +248,20 @@ class user_cmds(commands.Cog):
 
         log_file = "logs/endurabot.log"
 
-        chosen_lines = []
-
-        for line in reversed(list(open(log_file))):
-            chosen_lines.append(line.rstrip())
+        chosen_lines = [
+            line for line in reversed(list(open(log_file)))
+                if not re.search(r"Loaded", line)
+                and
+                not re.search(r"^---", line)
+                and
+                not re.search(r"Synced", line)
+                and
+                not re.search(r"Hello, world!", line)
+                and
+                not re.search(r":INFO:discord.client: logging in using static token", line)
+                and 
+                not re.search(r"PyNaCl is not installed", line)
+        ]
 
         if sum(len(i) for i in chosen_lines[0:lines]) > 4096:
             await interaction.followup.send(content="Number of lines requested exceeds Discord's embed character limit. Please try again.", ephemeral=True)
