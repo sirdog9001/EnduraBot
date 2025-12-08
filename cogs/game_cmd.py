@@ -36,16 +36,22 @@ class game_cmd(commands.Cog):
     @app_commands.command(name="game", description="Get price and identification information for a given video game.")
     @app_commands.check(check_permissions)
     @app_commands.guilds(GUILD_ID)
+    @app_commands.describe(
+        title = "Game title to search for.",
+        private = "Should the output only be visible by you? (default: False)"
+    )
     @app_commands.checks.cooldown(5, SETTINGS_DATA["game_cooldown_in_seconds"])
 
-    async def game(self, interaction: discord.Interaction, title: str, hide: bool = False):
+    async def game(self, interaction: discord.Interaction, title: str, private: bool = False):
 
         itad_name = "[IsThereAnyDeal](https://isthereanydeal.com/)"
         
-        if hide == False:
+        if private == False:
             await interaction.response.defer(ephemeral=False)
+            hide_state = False
         else:
             await interaction.response.defer(ephemeral=True)
+            hide_state = True
 
         api_rejected_embed = discord.Embed(
             title=":no_entry: API Key Rejected",
@@ -69,11 +75,11 @@ class game_cmd(commands.Cog):
             searched_game = ItadGameSearchHandler(title)
         except TypeError:
             await interaction.followup.send(embed=api_rejected_embed, ephemeral=True)
-            logger.critical(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal is rejecting EnduraBot's API key at endpoint [/games/lookup/v1].")
+            logger.critical(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal is rejecting EnduraBot's API key at endpoint [/games/lookup/v1]. Hide: [{hide_state}]")
             return
         except ValueError:
             await interaction.followup.send(embed=no_results_embed, ephemeral=True)
-            logger.error(f"{interaction.user} ({interaction.user.id}) ran /game searching for [{title}] and the API returned no results.")
+            logger.error(f"{interaction.user} ({interaction.user.id}) ran /game searching for [{title}] and the API returned no results. Hide: [{hide_state}]")
             return
         
         game_title = searched_game.get_title()
@@ -90,11 +96,11 @@ class game_cmd(commands.Cog):
             game_deals = ItadGameDealsHandler(games_to_get_deals)
         except TypeError:    
             await interaction.followup.send(embed=api_rejected_embed, ephemeral=True)
-            logger.critical(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal is rejecting EnduraBot's API key at endpoint [/games/prices/v3].")
+            logger.critical(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal is rejecting EnduraBot's API key at endpoint [/games/prices/v3]. Hide: [{hide_state}]")
             return
         except ValueError:
             await interaction.followup.send(embed=not_status_200_embed, ephemeral=True)
-            logger.error(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal did not return a status code 200 at endpoint [/games/prices/v3].")
+            logger.error(f"{interaction.user} ({interaction.user.id}) ran /game but IsThereAnyDeal did not return a status code 200 at endpoint [/games/prices/v3]. Hide: [{hide_state}]")
             return
 
         deal = game_deals.get_deals()[0]
@@ -108,10 +114,10 @@ class game_cmd(commands.Cog):
 
         if cut <= 0:
             custom_description = f"There are no detected deals for *{game_title}*. It can be found at {shop_fancy} for {full_amount}."
-            logger.info(f"{interaction.user} ({interaction.user.id}) ran /game for {game_title} (UUID: {game_uuid}) and found no deals. Displayed price was {full_amount} obtained from {shop_raw} (ID: {shop_id}).")
+            logger.info(f"{interaction.user} ({interaction.user.id}) ran /game for {game_title} (UUID: {game_uuid}) and found no deals. Displayed price was {full_amount} obtained from {shop_raw} (ID: {shop_id}). Hide: [{hide_state}]")
         if cut > 0:
             custom_description = f"*{game_title}* is currently on sale for {cut}% off at {shop_fancy} for {deal_amount}."
-            logger.info(f"{interaction.user} ({interaction.user.id}) ran /game for {game_title} (UUID: {game_uuid}) and found a deal. Deal was for {cut}% off at {shop_raw} (ID: {shop_id}) for {deal_amount}.")
+            logger.info(f"{interaction.user} ({interaction.user.id}) ran /game for {game_title} (UUID: {game_uuid}) and found a deal. Deal was for {cut}% off at {shop_raw} (ID: {shop_id}) for {deal_amount}. Hide: [{hide_state}]")
         
         embed = discord.Embed(
             title = f"{game_title}",
