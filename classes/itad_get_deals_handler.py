@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from itertools import islice
+from utils.config_loader import SETTINGS_DATA
 
 load_dotenv()
 
@@ -14,7 +15,7 @@ class ItadGameDealsHandler():
     def __init__(self, deals_list):
 
         deals_url = "https://api.isthereanydeal.com/games/prices/v3"
-        deals_header = {'key': API_TOKEN, 'deals': True, 'capacity': 1}
+        deals_header = {'key': API_TOKEN}
 
         response = requests.post(deals_url, params=deals_header, json=deals_list)
 
@@ -43,17 +44,18 @@ class ItadGameDealsHandler():
         except TypeError:
             return True
 
-    def get_deals_by_cut(self):
-        deals_sorted = sorted(self.deals, key=lambda x: x['deals'][0]['cut'], reverse=True)
-
-        deals_cut = list(islice(deals_sorted, 25))
-        return deals_cut
-
-    def get_deals_by_price(self):
+    def get_deals(self):
         deals_sorted = sorted(self.deals, key=lambda x: x['deals'][0]['price']['amount'])
 
+        blacklisted_ids = list(SETTINGS_DATA["blacklisted_itad_shops"].values())
+
+        for game in deals_sorted:
+            valid_offers = [
+                    offer for offer in game['deals'] 
+                    if offer['shop']['id'] not in blacklisted_ids
+                ]
+        
+            game['deals'] = valid_offers
+
         deals_cut = list(islice(deals_sorted, 25))
         return deals_cut
-
-test = ItadGameDealsHandler(["01945ff9-a71b-72ca-a4a9-c245c58bb561"])
-print(test.check_connection())
