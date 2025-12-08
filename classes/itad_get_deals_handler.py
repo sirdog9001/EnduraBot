@@ -45,17 +45,21 @@ class ItadGameDealsHandler():
             return True
 
     def get_deals(self):
-        deals_sorted = sorted(self.deals, key=lambda x: x['deals'][0]['price']['amount'])
+        deals_sorted_by_first_offer_price = sorted(self.deals, key=lambda x: x['deals'][0]['price']['amount'])
 
         blacklisted_ids = list(SETTINGS_DATA["blacklisted_itad_shops"].values())
 
-        for game in deals_sorted:
+        final_games_with_sorted_deals = [] 
+        for game_data in deals_sorted_by_first_offer_price:
             valid_offers = [
-                    offer for offer in game['deals'] 
+                    offer for offer in game_data['deals'] 
                     if offer['shop']['id'] not in blacklisted_ids
                 ]
-        
-            game['deals'] = valid_offers
+            
+            sorted_valid_offers = sorted(valid_offers, key=lambda offer: offer['price']['amount'])
+            
+            game_data['deals'] = sorted_valid_offers
+            final_games_with_sorted_deals.append(game_data)
 
-        deals_cut = list(islice(deals_sorted, 25))
+        deals_cut = list(final_games_with_sorted_deals)
         return deals_cut
