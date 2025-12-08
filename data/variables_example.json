@@ -22,7 +22,8 @@
     },
     "edc_ip": "192.168.1.100",
     "edc_url": "google.com",
-    "rquote_cooldown_in_minutes": 1800,
+    "rquote_cooldown_in_seconds": 1800,
+    "game_cooldown_in_seconds": 600,
     "max_old_quotes": 300,
     "bot_insult_chance": 1,
     "bibleq_hour_of_day": 1,
@@ -38,6 +39,9 @@
         "dummy_role_a": 1122334455667788990,
         "dummy_role_b": 2233445566778899001,
         "dummy_role_c": 3344556677889900112
+    },
+    "blacklisted_itad_shops": {
+        "Fanatical": 6
     },
     "rquote_themes": {
         "hr": {

@@ -41,7 +41,7 @@ class rquote(commands.Cog):
         self.bot = bot
         self.settings_data = SETTINGS_DATA
         self.exempt_role_ids = set(SETTINGS_DATA["cooldown_exempt_roles"])
-        self.cooldown = SETTINGS_DATA["rquote_cooldown_in_minutes"]
+        self.cooldown = SETTINGS_DATA["rquote_cooldown_in_seconds"]
         self.themes = SETTINGS_DATA["rquote_themes"]
         self.misc_data = MISC_DATA
     
