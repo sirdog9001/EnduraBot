@@ -24,6 +24,7 @@
     "edc_url": "google.com",
     "rquote_cooldown_in_seconds": 1800,
     "game_cooldown_in_seconds": 600,
+    "game_num_uses_before_cooldown": 5,
     "max_old_quotes": 300,
     "bot_insult_chance": 1,
     "bibleq_hour_of_day": 1,
