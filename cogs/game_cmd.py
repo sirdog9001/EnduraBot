@@ -40,7 +40,7 @@ class game_cmd(commands.Cog):
         title = "Game title to search for.",
         private = "Should the output only be visible by you? (default: False)"
     )
-    @app_commands.checks.cooldown(5, SETTINGS_DATA["game_cooldown_in_seconds"])
+    @app_commands.checks.cooldown(SETTINGS_DATA["game_num_uses_before_cooldown"], SETTINGS_DATA["game_cooldown_in_seconds"])
 
     async def game(self, interaction: discord.Interaction, title: str, private: bool = False):
 
